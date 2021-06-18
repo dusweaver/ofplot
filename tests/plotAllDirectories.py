@@ -43,6 +43,7 @@ def loopDirectories():
   print('Great Parent Folder Name: ', greatgrandParentFolderName)
 
   try:
+    #Reads the line_U.xy file and inputs into a pandas dataframe
     df = pd.read_csv("line_U.xy",  delimiter=r"\s+", names=['xloc', 'ux', 'uy','uz'])
 
   except IOError:
