@@ -24,9 +24,13 @@ class Configuration:
         self.get_domain_size()       
 
     def get_domain_size(self):
-        # TODO: Find a way to get the domain bounding box (like the one in checkMesh)
-        self.min_x = 0.0
-        self.domain = [[0.0, 0.0, 0.0],[1.0, 1.0, 1.0]]
+        os.chdir(self.cases[0])
+        output = subprocess.check_output(['checkMesh'], encoding='utf-8')
+        for line in output.splitlines():
+            if 'bounding box' in line:
+                a = line.replace('(','').replace(')','').split('box')[-1].split()
+        self.domain = [[a[0], a[1], a[2]],[a[3], a[4], a[5]]]
+        os.chdir(self.home)
 
     def read_files(self, target):
         all_files = glob.glob(f'{target}/*')
