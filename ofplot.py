@@ -2,7 +2,6 @@ import glob
 import os
 import sys
 import subprocess
-import numpy as np
 
 import PyFoam
 from PyFoam.Execution.UtilityRunner import UtilityRunner
@@ -61,7 +60,7 @@ class Configuration:
         string += '#include "sampleDict.cfg"' + '\n'
         string += 'setConfig { type uniform; }' + '\n'
         string += '#includeEtc "caseDicts/postProcessing/graphs/graph.cfg"' + '\n'
-        with open(case+f'/system/sample_{key_loc}', 'w') as f:
+        with open(case+f'/system/sample_{key_loc}_{key_field}', 'w') as f:
             f.write(string)
 
     def reconstruct_par(self, case):
