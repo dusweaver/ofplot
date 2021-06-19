@@ -1,7 +1,7 @@
 rm -f pitz*/commands*
-rm -rf pitz*/constant/polyMesh
 rm -rf pitz*/1*
 rm -rf pitz*/2*
 rm -rf pitz*/3*
 rm -rf pitz*/4*
 rm -rf pitz*/postProcess*
+rm -rf pitz*/system/sample*

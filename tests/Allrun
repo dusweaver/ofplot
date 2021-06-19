@@ -1,4 +1,3 @@
 #!/bin/bash
 
 bash parallelExecuteCommands.sh
-python plotAllDirectories.py |tee log.txt	

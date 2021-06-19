@@ -83,6 +83,7 @@ directories.remove(os.path.abspath(path))
 ax = plt.gca()
 
 
+#loops through all directories 
 for i in directories:
       os.chdir(i)         # Change working Directory
       try:
