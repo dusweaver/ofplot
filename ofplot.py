@@ -134,10 +134,10 @@ class Configuration:
     def add_field(self, value, col=1):
         self.fields[value] = col
     
-    def add_line(self, x='length', y='length', z='length'):
+    def add_line(self, x='length', y='length', z='length', coord='rel'):
         current = f'line{len(self.lines)}'
-
-        x, y, z = self.convert_relative(x, y, z)
+        if coord == 'rel':
+            x, y, z = self.convert_relative(x, y, z)
 
         if not isinstance(x, str) and not isinstance(y, str):
             self.lines[current] = [[x, x],[y, y],[self.domain[0][2], self.domain[1][2]]]
@@ -148,10 +148,11 @@ class Configuration:
         else:
             print(f'Bad location definition: {x} {y} {z}')
 
-    def add_plane(self, x, y, z, normal):
+    def add_plane(self, x, y, z, normal, coord='rel'):
         current = f'plane{len(self.planes)}'
 
-        x, y, z = self.convert_relative(x, y, z)
+        if coord == 'rel':
+            x, y, z = self.convert_relative(x, y, z)
 
         if normal == 'x':
             normal = [1, 0, 0]
