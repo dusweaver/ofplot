@@ -2,6 +2,7 @@ import glob
 import os
 import sys
 import shlex,subprocess
+import numpy as np
 from matplotlib import pyplot as plt
 import PyFoam
 from PyFoam.Execution.UtilityRunner import UtilityRunner
@@ -16,6 +17,10 @@ class Configuration:
         else:
             self.target = target
 
+        if os.environ['WM_PROJECT_VERSION'][0] == 'v':
+            self.version = 'COM'
+        else:
+            self.version = 'ORG'
         self.files = []
         self.cases = []
         self.domain = []
@@ -51,30 +56,25 @@ class Configuration:
             self.cases.remove(f'{target}/results')
         except:
             pass
-        print(self.cases)
 
-    def create_sample_cfg(self, case):
-        os.chdir(self.home)
-        string  = '//sampleDict.cfg' + '\n'
+    def create_sample_line(self, case, key_loc, value_loc, key_field):
+        string  = f'//sample{key_loc}.cfg' + '\n'
         string += 'interpolationScheme cellPointFace;' + '\n'
         string += 'setFormat   raw;' + '\n'
         string += 'setConfig' + '\n'
         string += '{' + '\n'
-        string += 'type    uniform;' + '\n'
+        if self.version == 'COM':
+            string += 'type    uniform;' + '\n'
+        else:
+            string += 'type    lineUniform;' + '\n'
         string += 'axis    distance;' + '\n'
         string += 'nPoints 100;' + '\n'
         string += '}'
-        with open(case+'/system/sampleDict.cfg', 'w') as f:
-            f.write(string)
-
-    def create_sample_line(self, case, key_loc, value_loc, key_field):
-        string  = f'//sample{key_loc}.cfg' + '\n'
         string += f'start   ({value_loc[0][0]} {value_loc[1][0]} {value_loc[2][0]});' + '\n'
         string += f'end     ({value_loc[0][1]} {value_loc[1][1]} {value_loc[2][1]});' + '\n'
         string += f'fields  ({key_field});' + '\n'
-        string += '#include "sampleDict.cfg"' + '\n'
-        string += 'setConfig { type uniform; }' + '\n'
         string += '#includeEtc "caseDicts/postProcessing/graphs/graph.cfg"' + '\n'
+
         filename = f'sample_{key_loc}_{key_field}'
         with open(case+'/system/'+filename, 'w') as f:
             f.write(string)
@@ -100,6 +100,7 @@ class Configuration:
         string += '         }' + '\n'
         string += '    }' + '\n'
         string += '};' + '\n'
+
         filename = f'sample_{key_loc}_{key_field}'
         with open(case+'/system/'+filename, 'w') as f:
             f.write(string)
@@ -174,9 +175,7 @@ class Configuration:
         return x, y, z
 
     def run_parallel(self, command):
-        print('Entering directory: ', os.getcwd())
         args = ['parallel', command, '-case', ':::'] + self.cases
-        print(args)
         subprocess.run(args)
 
     #in theory this nested parallel script should work but haven't tried because I need self.samplenames
@@ -198,24 +197,39 @@ class Configuration:
             for sample in self.samplenames:
                 for time in self.times:
                     args = ['postProcess', '-func', sample, '-time', str(time)]
-                    print(args)
                     subprocess.run(args)
             os.chdir(self.home)
 
     def groupByCase(self):
         pass
 
-    def plot(self):            
-        fig, ax = plt.subplots()
-        ax.scatter(exp_x, exp_y_m[id_], label='EXP')
-        ax.scatter(x, y, label='CFD')
-        ax.legend(loc='best')
-        os.makedirs('results', exist_ok=True)
-        plt.savefig(f'results/{case}.png')
-           
+    def groupByTime(self):
+        pass
+
+    def groupBySample(self):
+        pass
+
+    def group_by(self):
+        grouped = []
+        for case in self.cases:
+            for sample in self.samplenames:
+                samplesplit = sample.split('_')
+                samplename = samplesplit[1][:-1] + '_' + samplesplit[2] + '.xz'
+                for time in self.times:
+                    #print(case, sample, time)
+                    #data = np.loadtxt(case + '/postProcessing/' + sample + '/' + str(time) + '/' + samplename)
+                    # x, y = np.loadtxt(sample)
+                    # fig, ax = plt.subplots()
+                    # #ax.scatter(exp_x, exp_y_m[id_], label='EXP')
+                    # ax.scatter(x, y, label='CFD')
+                    # ax.legend(loc='best')
+                    # os.makedirs('results', exist_ok=True)
+                    # plt.savefig(f'results/{case}.png')
+                    pass
+        #print(data)
+
     def generate(self):
         for case in self.cases:
-            self.create_sample_cfg(case)
             if not self.decomposed:
                 self.reconstruct_par(case)
             # Create sample lines
@@ -226,7 +240,7 @@ class Configuration:
             for key_loc, value_loc in self.planes.items():
                 for key_field in self.fields:
                     self.create_sample_plane(case, key_loc, value_loc, key_field)
-
+        print('Sample files generated')
 
 #Dustin notes:
 # Ability to use run_parallel('blockMesh') before Configuration is done because get_domain_size() required polymesh
