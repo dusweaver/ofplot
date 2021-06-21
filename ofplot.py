@@ -29,6 +29,7 @@ class Configuration:
 
         self.read_files(self.target)
         self.decomposed = False
+        self.run_parallel('blockMesh')
         self.get_domain_size()       
 
     def get_domain_size(self):
@@ -113,20 +114,22 @@ class Configuration:
         os.chdir(self.home)
 
     def add_time(self, value):
-        solution = PyFoam.RunDictionary.SolutionDirectory.SolutionDirectory(self.target)
-        if value == 'latest':
-            self.times.append(solution.getLast())
-        elif value == 'first':
-            self.times.append(solution.getFirst())
-        elif value == 'all':
-            if self.reconstructed:
-                self.times.append(solution.getTimes())
-            else:
-                self.times.append(solution.getParallelTimes())
-        elif isinstance(value, int):
-            self.times.append(value)
-        else:
-            print('Time not found: ', value)
+        self.times.append(value)
+        #solution = PyFoam.RunDictionary.SolutionDirectory.SolutionDirectory(self.target)
+        #print(solution.getLast())
+        #if value == 'latest':
+            #self.times.append(solution.getLast())
+        #elif value == 'first':
+            #self.times.append(solution.getFirst())
+        #elif value == 'all':
+            #if self.reconstructed:
+                #self.times.append(solution.getTimes())
+            #else:
+                #self.times.append(solution.getParallelTimes())
+        #elif isinstance(value, int):
+            #self.times.append(value)
+        #else:
+            #print('Time not found: ', value)
 
     def add_field(self, value, col=1):
         self.fields[value] = col
@@ -170,20 +173,34 @@ class Configuration:
         return x, y, z
 
     def run_parallel(self, command):
-        #change to the home directory
-        os.chdir(self.home)
-        print('entering directory: ', os.getcwd())
+        print('Entering directory: ', os.getcwd())
         args = ['parallel', command, '-case', ':::'] + self.cases
         print(args)
         subprocess.run(args)
 
     #in theory this nested parallel script should work but haven't tried because I need self.samplenames
-    def run_postprocess(self):
-        args = ['parallel', run_parallel('postProcess'),'-time',':::'] + self.samplenames
+    def post_process(self):
+        args = ['parallel', self.run_parallel('postProcess'), '-time', ':::'] + self.samplenames
         subprocess.run(args)
 
+    def post_process_test(self):
+        for case in self.cases:
+            os.chdir(case)
+            for time in self.times:
+                args = ['parallel', 'postProcess', '-time', str(time), '-func', ':::'] + self.samplenames
+                subprocess.run(args)
+            os.chdir(self.home)
+        
+    def post_process_single(self):
+        for case in self.cases:
+            os.chdir(case)
+            for sample in self.samplenames:
+                for time in self.times:
+                    args = ['postProcess', '-func', sample, '-time', str(time)]
+                    print(args)
+                    subprocess.run(args)
+            os.chdir(self.home)
 
-    
     def groupByCase(self):
         pass
 
@@ -195,48 +212,20 @@ class Configuration:
         os.makedirs('results', exist_ok=True)
         plt.savefig(f'results/{case}.png')
            
-    def run(self):
+    def generate(self):
         for case in self.cases:
             self.create_sample_cfg(case)
             if not self.decomposed:
                 self.reconstruct_par(case)
+            # Create sample lines
             for key_loc, value_loc in self.lines.items():
                 for key_field in self.fields:
                     self.create_sample_line(case, key_loc, value_loc, key_field)
+            # Create sample planes
             for key_loc, value_loc in self.planes.items():
                 for key_field in self.fields:
                     self.create_sample_plane(case, key_loc, value_loc, key_field)
-                #post_process(case, key)
-            #self.plot()
 
 
 #Dustin notes:
 # Ability to use run_parallel('blockMesh') before Configuration is done because get_domain_size() required polymesh
-
-        
-if __name__ == '__main__':
-    target = sys.argv[1]
-    plot = Configuration(target)
-
-    
-    #plot.add_field('alpha.water')
-    plot.add_field('p') # scalar
-    plot.add_field('U', 2) # vector
-    #plot.add_field('R', 4) # tensor
-    
-    plot.add_line(x=0.1, y=0.5)
-    plot.add_line(x=0.9, y=0.5)
-    plot.add_plane(x=0.0, y=0.5, z=0.0, normal='y')
-    #plot.add_location(y=0.0, z=0.0)
-    
-    #plot.add_time(200)
-    plot.add_time('latest')
-
-    plot.run_parallel('simpleFoam')
-
-    
-    plot.decomposed = True
-
-    
-    
-    plot.run()
