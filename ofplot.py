@@ -1,7 +1,7 @@
 import glob
 import os
 import sys
-import subprocess
+import shlex,subprocess
 
 import PyFoam
 from PyFoam.Execution.UtilityRunner import UtilityRunner
@@ -11,14 +11,20 @@ class Configuration:
         self.home = os.path.abspath('.')
         if target[-1] == '/':
             self.target = target[:-1]
+
         else:
             self.target = target
+
         self.files = []
         self.cases = []
         self.domain = []
         self.times = []
         self.fields = {}
         self.locations = {}
+
+        #name of sampling line files
+        self.samplenames={}
+
         self.read_files(self.target)
         self.decomposed = False
         self.get_domain_size()       
@@ -41,7 +47,8 @@ class Configuration:
             self.cases.remove(f'{target}/results')
         except:
             pass
-        
+        print(self.cases)
+
     def create_sample_cfg(self, case):
         os.chdir(self.home)
         string  = '//sampleDict.cfg' + '\n'
@@ -106,8 +113,26 @@ class Configuration:
         else:
             print(f'Bad location definition: {x} {y} {z}')
             
-    def run_parallel(self):
+    def run_parallel(self, command):
+        #change to the home directory
+        home = os.chdir(self.home)
+        print('entering directory: ', os.getcwd())
+
+        args = ['parallel', command, '-case', ':::'] +self.cases
+
+        print(args)
+
+        subprocess.run(args)
+
+    #in theory this nested parallel script should work but haven't tried because I need self.samplenames
+    def run_postprocess(self):
+
+        args = ['parallel', run_parallel('postProcess'),'-time',':::'] + self.samplenames
+
+        subprocess.run(args)
+
         pass
+
     
     def groupByCase(self):
         pass
@@ -132,10 +157,15 @@ class Configuration:
             #self.plot()
 
 
+#Dustin notes:
+# Ability to use run_parallel('blockMesh') before Configuration is done because get_domain_size() required polymesh
+
         
 if __name__ == '__main__':
     target = sys.argv[1]
     plot = Configuration(target)
+
+    
     
     plot.add_field('p') # scalar
     plot.add_field('U', 2) # vector
@@ -145,9 +175,14 @@ if __name__ == '__main__':
     plot.add_location(x=0.9, y=0.5)
     #plot.add_location(y=0.0, z=0.0)
     
-    plot.add_time(35)
+    plot.add_time(200)
     #plot.add_time('latest')
+
+    plot.run_parallel('simpleFoam')
+
     
     plot.decomposed = True
+
+    
     
     plot.run()

@@ -1,0 +1,459 @@
+entering directory:  /home/dustin/OpenFOAM/ofplot/tests/pitzDaily3
+Full Path    :/home/dustin/OpenFOAM/ofplot/tests/pitzDaily3/plotAllDirectories.py
+List of Folders: ['', 'home', 'dustin', 'OpenFOAM', 'ofplot', 'tests', 'pitzDaily3', 'plotAllDirectories.py']
+Program Name :plotAllDirectories.py
+Folder Name:  pitzDaily3
+Parent Folder Name:  tests
+Grand Parent Folder Name:  ofplot
+Great Parent Folder Name:  OpenFOAM
+There was an error opening the file!
+entering directory:  /home/dustin/OpenFOAM/ofplot/tests/pitzDaily3/postProcessing
+Full Path    :/home/dustin/OpenFOAM/ofplot/tests/pitzDaily3/postProcessing/plotAllDirectories.py
+List of Folders: ['', 'home', 'dustin', 'OpenFOAM', 'ofplot', 'tests', 'pitzDaily3', 'postProcessing', 'plotAllDirectories.py']
+Program Name :plotAllDirectories.py
+Folder Name:  postProcessing
+Parent Folder Name:  pitzDaily3
+Grand Parent Folder Name:  tests
+Great Parent Folder Name:  ofplot
+There was an error opening the file!
+entering directory:  /home/dustin/OpenFOAM/ofplot/tests/pitzDaily3/postProcessing/sets
+Full Path    :/home/dustin/OpenFOAM/ofplot/tests/pitzDaily3/postProcessing/sets/plotAllDirectories.py
+List of Folders: ['', 'home', 'dustin', 'OpenFOAM', 'ofplot', 'tests', 'pitzDaily3', 'postProcessing', 'sets', 'plotAllDirectories.py']
+Program Name :plotAllDirectories.py
+Folder Name:  sets
+Parent Folder Name:  postProcessing
+Grand Parent Folder Name:  pitzDaily3
+Great Parent Folder Name:  tests
+There was an error opening the file!
+entering directory:  /home/dustin/OpenFOAM/ofplot/tests/pitzDaily3/postProcessing/sets/streamlines
+Full Path    :/home/dustin/OpenFOAM/ofplot/tests/pitzDaily3/postProcessing/sets/streamlines/plotAllDirectories.py
+List of Folders: ['', 'home', 'dustin', 'OpenFOAM', 'ofplot', 'tests', 'pitzDaily3', 'postProcessing', 'sets', 'streamlines', 'plotAllDirectories.py']
+Program Name :plotAllDirectories.py
+Folder Name:  streamlines
+Parent Folder Name:  sets
+Grand Parent Folder Name:  postProcessing
+Great Parent Folder Name:  pitzDaily3
+There was an error opening the file!
+entering directory:  /home/dustin/OpenFOAM/ofplot/tests/pitzDaily3/postProcessing/sets/streamlines/200
+Full Path    :/home/dustin/OpenFOAM/ofplot/tests/pitzDaily3/postProcessing/sets/streamlines/200/plotAllDirectories.py
+List of Folders: ['', 'home', 'dustin', 'OpenFOAM', 'ofplot', 'tests', 'pitzDaily3', 'postProcessing', 'sets', 'streamlines', '200', 'plotAllDirectories.py']
+Program Name :plotAllDirectories.py
+Folder Name:  200
+Parent Folder Name:  streamlines
+Grand Parent Folder Name:  sets
+Great Parent Folder Name:  postProcessing
+There was an error opening the file!
+entering directory:  /home/dustin/OpenFOAM/ofplot/tests/pitzDaily3/postProcessing/sets/streamlines/100
+Full Path    :/home/dustin/OpenFOAM/ofplot/tests/pitzDaily3/postProcessing/sets/streamlines/100/plotAllDirectories.py
+List of Folders: ['', 'home', 'dustin', 'OpenFOAM', 'ofplot', 'tests', 'pitzDaily3', 'postProcessing', 'sets', 'streamlines', '100', 'plotAllDirectories.py']
+Program Name :plotAllDirectories.py
+Folder Name:  100
+Parent Folder Name:  streamlines
+Grand Parent Folder Name:  sets
+Great Parent Folder Name:  postProcessing
+There was an error opening the file!
+entering directory:  /home/dustin/OpenFOAM/ofplot/tests/pitzDaily3/postProcessing/sets/streamlines/292
+Full Path    :/home/dustin/OpenFOAM/ofplot/tests/pitzDaily3/postProcessing/sets/streamlines/292/plotAllDirectories.py
+List of Folders: ['', 'home', 'dustin', 'OpenFOAM', 'ofplot', 'tests', 'pitzDaily3', 'postProcessing', 'sets', 'streamlines', '292', 'plotAllDirectories.py']
+Program Name :plotAllDirectories.py
+Folder Name:  292
+Parent Folder Name:  streamlines
+Grand Parent Folder Name:  sets
+Great Parent Folder Name:  postProcessing
+There was an error opening the file!
+entering directory:  /home/dustin/OpenFOAM/ofplot/tests/pitzDaily3/0
+Full Path    :/home/dustin/OpenFOAM/ofplot/tests/pitzDaily3/0/plotAllDirectories.py
+List of Folders: ['', 'home', 'dustin', 'OpenFOAM', 'ofplot', 'tests', 'pitzDaily3', '0', 'plotAllDirectories.py']
+Program Name :plotAllDirectories.py
+Folder Name:  0
+Parent Folder Name:  pitzDaily3
+Grand Parent Folder Name:  tests
+Great Parent Folder Name:  ofplot
+There was an error opening the file!
+entering directory:  /home/dustin/OpenFOAM/ofplot/tests/pitzDaily3/200
+Full Path    :/home/dustin/OpenFOAM/ofplot/tests/pitzDaily3/200/plotAllDirectories.py
+List of Folders: ['', 'home', 'dustin', 'OpenFOAM', 'ofplot', 'tests', 'pitzDaily3', '200', 'plotAllDirectories.py']
+Program Name :plotAllDirectories.py
+Folder Name:  200
+Parent Folder Name:  pitzDaily3
+Grand Parent Folder Name:  tests
+Great Parent Folder Name:  ofplot
+There was an error opening the file!
+entering directory:  /home/dustin/OpenFOAM/ofplot/tests/pitzDaily3/200/uniform
+Full Path    :/home/dustin/OpenFOAM/ofplot/tests/pitzDaily3/200/uniform/plotAllDirectories.py
+List of Folders: ['', 'home', 'dustin', 'OpenFOAM', 'ofplot', 'tests', 'pitzDaily3', '200', 'uniform', 'plotAllDirectories.py']
+Program Name :plotAllDirectories.py
+Folder Name:  uniform
+Parent Folder Name:  200
+Grand Parent Folder Name:  pitzDaily3
+Great Parent Folder Name:  tests
+There was an error opening the file!
+entering directory:  /home/dustin/OpenFOAM/ofplot/tests/pitzDaily3/constant
+Full Path    :/home/dustin/OpenFOAM/ofplot/tests/pitzDaily3/constant/plotAllDirectories.py
+List of Folders: ['', 'home', 'dustin', 'OpenFOAM', 'ofplot', 'tests', 'pitzDaily3', 'constant', 'plotAllDirectories.py']
+Program Name :plotAllDirectories.py
+Folder Name:  constant
+Parent Folder Name:  pitzDaily3
+Grand Parent Folder Name:  tests
+Great Parent Folder Name:  ofplot
+There was an error opening the file!
+entering directory:  /home/dustin/OpenFOAM/ofplot/tests/pitzDaily3/constant/polyMesh
+Full Path    :/home/dustin/OpenFOAM/ofplot/tests/pitzDaily3/constant/polyMesh/plotAllDirectories.py
+List of Folders: ['', 'home', 'dustin', 'OpenFOAM', 'ofplot', 'tests', 'pitzDaily3', 'constant', 'polyMesh', 'plotAllDirectories.py']
+Program Name :plotAllDirectories.py
+Folder Name:  polyMesh
+Parent Folder Name:  constant
+Grand Parent Folder Name:  pitzDaily3
+Great Parent Folder Name:  tests
+There was an error opening the file!
+entering directory:  /home/dustin/OpenFOAM/ofplot/tests/pitzDaily3/100
+Full Path    :/home/dustin/OpenFOAM/ofplot/tests/pitzDaily3/100/plotAllDirectories.py
+List of Folders: ['', 'home', 'dustin', 'OpenFOAM', 'ofplot', 'tests', 'pitzDaily3', '100', 'plotAllDirectories.py']
+Program Name :plotAllDirectories.py
+Folder Name:  100
+Parent Folder Name:  pitzDaily3
+Grand Parent Folder Name:  tests
+Great Parent Folder Name:  ofplot
+There was an error opening the file!
+entering directory:  /home/dustin/OpenFOAM/ofplot/tests/pitzDaily3/100/uniform
+Full Path    :/home/dustin/OpenFOAM/ofplot/tests/pitzDaily3/100/uniform/plotAllDirectories.py
+List of Folders: ['', 'home', 'dustin', 'OpenFOAM', 'ofplot', 'tests', 'pitzDaily3', '100', 'uniform', 'plotAllDirectories.py']
+Program Name :plotAllDirectories.py
+Folder Name:  uniform
+Parent Folder Name:  100
+Grand Parent Folder Name:  pitzDaily3
+Great Parent Folder Name:  tests
+There was an error opening the file!
+entering directory:  /home/dustin/OpenFOAM/ofplot/tests/pitzDaily3/292
+Full Path    :/home/dustin/OpenFOAM/ofplot/tests/pitzDaily3/292/plotAllDirectories.py
+List of Folders: ['', 'home', 'dustin', 'OpenFOAM', 'ofplot', 'tests', 'pitzDaily3', '292', 'plotAllDirectories.py']
+Program Name :plotAllDirectories.py
+Folder Name:  292
+Parent Folder Name:  pitzDaily3
+Grand Parent Folder Name:  tests
+Great Parent Folder Name:  ofplot
+There was an error opening the file!
+entering directory:  /home/dustin/OpenFOAM/ofplot/tests/pitzDaily3/292/uniform
+Full Path    :/home/dustin/OpenFOAM/ofplot/tests/pitzDaily3/292/uniform/plotAllDirectories.py
+List of Folders: ['', 'home', 'dustin', 'OpenFOAM', 'ofplot', 'tests', 'pitzDaily3', '292', 'uniform', 'plotAllDirectories.py']
+Program Name :plotAllDirectories.py
+Folder Name:  uniform
+Parent Folder Name:  292
+Grand Parent Folder Name:  pitzDaily3
+Great Parent Folder Name:  tests
+There was an error opening the file!
+entering directory:  /home/dustin/OpenFOAM/ofplot/tests/pitzDaily3/system
+Full Path    :/home/dustin/OpenFOAM/ofplot/tests/pitzDaily3/system/plotAllDirectories.py
+List of Folders: ['', 'home', 'dustin', 'OpenFOAM', 'ofplot', 'tests', 'pitzDaily3', 'system', 'plotAllDirectories.py']
+Program Name :plotAllDirectories.py
+Folder Name:  system
+Parent Folder Name:  pitzDaily3
+Grand Parent Folder Name:  tests
+Great Parent Folder Name:  ofplot
+There was an error opening the file!
+entering directory:  /home/dustin/OpenFOAM/ofplot/tests/pitzDaily
+Full Path    :/home/dustin/OpenFOAM/ofplot/tests/pitzDaily/plotAllDirectories.py
+List of Folders: ['', 'home', 'dustin', 'OpenFOAM', 'ofplot', 'tests', 'pitzDaily', 'plotAllDirectories.py']
+Program Name :plotAllDirectories.py
+Folder Name:  pitzDaily
+Parent Folder Name:  tests
+Grand Parent Folder Name:  ofplot
+Great Parent Folder Name:  OpenFOAM
+There was an error opening the file!
+entering directory:  /home/dustin/OpenFOAM/ofplot/tests/pitzDaily/287
+Full Path    :/home/dustin/OpenFOAM/ofplot/tests/pitzDaily/287/plotAllDirectories.py
+List of Folders: ['', 'home', 'dustin', 'OpenFOAM', 'ofplot', 'tests', 'pitzDaily', '287', 'plotAllDirectories.py']
+Program Name :plotAllDirectories.py
+Folder Name:  287
+Parent Folder Name:  pitzDaily
+Grand Parent Folder Name:  tests
+Great Parent Folder Name:  ofplot
+There was an error opening the file!
+entering directory:  /home/dustin/OpenFOAM/ofplot/tests/pitzDaily/287/uniform
+Full Path    :/home/dustin/OpenFOAM/ofplot/tests/pitzDaily/287/uniform/plotAllDirectories.py
+List of Folders: ['', 'home', 'dustin', 'OpenFOAM', 'ofplot', 'tests', 'pitzDaily', '287', 'uniform', 'plotAllDirectories.py']
+Program Name :plotAllDirectories.py
+Folder Name:  uniform
+Parent Folder Name:  287
+Grand Parent Folder Name:  pitzDaily
+Great Parent Folder Name:  tests
+There was an error opening the file!
+entering directory:  /home/dustin/OpenFOAM/ofplot/tests/pitzDaily/postProcessing
+Full Path    :/home/dustin/OpenFOAM/ofplot/tests/pitzDaily/postProcessing/plotAllDirectories.py
+List of Folders: ['', 'home', 'dustin', 'OpenFOAM', 'ofplot', 'tests', 'pitzDaily', 'postProcessing', 'plotAllDirectories.py']
+Program Name :plotAllDirectories.py
+Folder Name:  postProcessing
+Parent Folder Name:  pitzDaily
+Grand Parent Folder Name:  tests
+Great Parent Folder Name:  ofplot
+There was an error opening the file!
+entering directory:  /home/dustin/OpenFOAM/ofplot/tests/pitzDaily/postProcessing/sets
+Full Path    :/home/dustin/OpenFOAM/ofplot/tests/pitzDaily/postProcessing/sets/plotAllDirectories.py
+List of Folders: ['', 'home', 'dustin', 'OpenFOAM', 'ofplot', 'tests', 'pitzDaily', 'postProcessing', 'sets', 'plotAllDirectories.py']
+Program Name :plotAllDirectories.py
+Folder Name:  sets
+Parent Folder Name:  postProcessing
+Grand Parent Folder Name:  pitzDaily
+Great Parent Folder Name:  tests
+There was an error opening the file!
+entering directory:  /home/dustin/OpenFOAM/ofplot/tests/pitzDaily/postProcessing/sets/streamlines
+Full Path    :/home/dustin/OpenFOAM/ofplot/tests/pitzDaily/postProcessing/sets/streamlines/plotAllDirectories.py
+List of Folders: ['', 'home', 'dustin', 'OpenFOAM', 'ofplot', 'tests', 'pitzDaily', 'postProcessing', 'sets', 'streamlines', 'plotAllDirectories.py']
+Program Name :plotAllDirectories.py
+Folder Name:  streamlines
+Parent Folder Name:  sets
+Grand Parent Folder Name:  postProcessing
+Great Parent Folder Name:  pitzDaily
+There was an error opening the file!
+entering directory:  /home/dustin/OpenFOAM/ofplot/tests/pitzDaily/postProcessing/sets/streamlines/287
+Full Path    :/home/dustin/OpenFOAM/ofplot/tests/pitzDaily/postProcessing/sets/streamlines/287/plotAllDirectories.py
+List of Folders: ['', 'home', 'dustin', 'OpenFOAM', 'ofplot', 'tests', 'pitzDaily', 'postProcessing', 'sets', 'streamlines', '287', 'plotAllDirectories.py']
+Program Name :plotAllDirectories.py
+Folder Name:  287
+Parent Folder Name:  streamlines
+Grand Parent Folder Name:  sets
+Great Parent Folder Name:  postProcessing
+There was an error opening the file!
+entering directory:  /home/dustin/OpenFOAM/ofplot/tests/pitzDaily/postProcessing/sets/streamlines/200
+Full Path    :/home/dustin/OpenFOAM/ofplot/tests/pitzDaily/postProcessing/sets/streamlines/200/plotAllDirectories.py
+List of Folders: ['', 'home', 'dustin', 'OpenFOAM', 'ofplot', 'tests', 'pitzDaily', 'postProcessing', 'sets', 'streamlines', '200', 'plotAllDirectories.py']
+Program Name :plotAllDirectories.py
+Folder Name:  200
+Parent Folder Name:  streamlines
+Grand Parent Folder Name:  sets
+Great Parent Folder Name:  postProcessing
+There was an error opening the file!
+entering directory:  /home/dustin/OpenFOAM/ofplot/tests/pitzDaily/postProcessing/sets/streamlines/100
+Full Path    :/home/dustin/OpenFOAM/ofplot/tests/pitzDaily/postProcessing/sets/streamlines/100/plotAllDirectories.py
+List of Folders: ['', 'home', 'dustin', 'OpenFOAM', 'ofplot', 'tests', 'pitzDaily', 'postProcessing', 'sets', 'streamlines', '100', 'plotAllDirectories.py']
+Program Name :plotAllDirectories.py
+Folder Name:  100
+Parent Folder Name:  streamlines
+Grand Parent Folder Name:  sets
+Great Parent Folder Name:  postProcessing
+There was an error opening the file!
+entering directory:  /home/dustin/OpenFOAM/ofplot/tests/pitzDaily/0
+Full Path    :/home/dustin/OpenFOAM/ofplot/tests/pitzDaily/0/plotAllDirectories.py
+List of Folders: ['', 'home', 'dustin', 'OpenFOAM', 'ofplot', 'tests', 'pitzDaily', '0', 'plotAllDirectories.py']
+Program Name :plotAllDirectories.py
+Folder Name:  0
+Parent Folder Name:  pitzDaily
+Grand Parent Folder Name:  tests
+Great Parent Folder Name:  ofplot
+There was an error opening the file!
+entering directory:  /home/dustin/OpenFOAM/ofplot/tests/pitzDaily/200
+Full Path    :/home/dustin/OpenFOAM/ofplot/tests/pitzDaily/200/plotAllDirectories.py
+List of Folders: ['', 'home', 'dustin', 'OpenFOAM', 'ofplot', 'tests', 'pitzDaily', '200', 'plotAllDirectories.py']
+Program Name :plotAllDirectories.py
+Folder Name:  200
+Parent Folder Name:  pitzDaily
+Grand Parent Folder Name:  tests
+Great Parent Folder Name:  ofplot
+There was an error opening the file!
+entering directory:  /home/dustin/OpenFOAM/ofplot/tests/pitzDaily/200/uniform
+Full Path    :/home/dustin/OpenFOAM/ofplot/tests/pitzDaily/200/uniform/plotAllDirectories.py
+List of Folders: ['', 'home', 'dustin', 'OpenFOAM', 'ofplot', 'tests', 'pitzDaily', '200', 'uniform', 'plotAllDirectories.py']
+Program Name :plotAllDirectories.py
+Folder Name:  uniform
+Parent Folder Name:  200
+Grand Parent Folder Name:  pitzDaily
+Great Parent Folder Name:  tests
+There was an error opening the file!
+entering directory:  /home/dustin/OpenFOAM/ofplot/tests/pitzDaily/constant
+Full Path    :/home/dustin/OpenFOAM/ofplot/tests/pitzDaily/constant/plotAllDirectories.py
+List of Folders: ['', 'home', 'dustin', 'OpenFOAM', 'ofplot', 'tests', 'pitzDaily', 'constant', 'plotAllDirectories.py']
+Program Name :plotAllDirectories.py
+Folder Name:  constant
+Parent Folder Name:  pitzDaily
+Grand Parent Folder Name:  tests
+Great Parent Folder Name:  ofplot
+There was an error opening the file!
+entering directory:  /home/dustin/OpenFOAM/ofplot/tests/pitzDaily/constant/polyMesh
+Full Path    :/home/dustin/OpenFOAM/ofplot/tests/pitzDaily/constant/polyMesh/plotAllDirectories.py
+List of Folders: ['', 'home', 'dustin', 'OpenFOAM', 'ofplot', 'tests', 'pitzDaily', 'constant', 'polyMesh', 'plotAllDirectories.py']
+Program Name :plotAllDirectories.py
+Folder Name:  polyMesh
+Parent Folder Name:  constant
+Grand Parent Folder Name:  pitzDaily
+Great Parent Folder Name:  tests
+There was an error opening the file!
+entering directory:  /home/dustin/OpenFOAM/ofplot/tests/pitzDaily/100
+Full Path    :/home/dustin/OpenFOAM/ofplot/tests/pitzDaily/100/plotAllDirectories.py
+List of Folders: ['', 'home', 'dustin', 'OpenFOAM', 'ofplot', 'tests', 'pitzDaily', '100', 'plotAllDirectories.py']
+Program Name :plotAllDirectories.py
+Folder Name:  100
+Parent Folder Name:  pitzDaily
+Grand Parent Folder Name:  tests
+Great Parent Folder Name:  ofplot
+There was an error opening the file!
+entering directory:  /home/dustin/OpenFOAM/ofplot/tests/pitzDaily/100/uniform
+Full Path    :/home/dustin/OpenFOAM/ofplot/tests/pitzDaily/100/uniform/plotAllDirectories.py
+List of Folders: ['', 'home', 'dustin', 'OpenFOAM', 'ofplot', 'tests', 'pitzDaily', '100', 'uniform', 'plotAllDirectories.py']
+Program Name :plotAllDirectories.py
+Folder Name:  uniform
+Parent Folder Name:  100
+Grand Parent Folder Name:  pitzDaily
+Great Parent Folder Name:  tests
+There was an error opening the file!
+entering directory:  /home/dustin/OpenFOAM/ofplot/tests/pitzDaily/system
+Full Path    :/home/dustin/OpenFOAM/ofplot/tests/pitzDaily/system/plotAllDirectories.py
+List of Folders: ['', 'home', 'dustin', 'OpenFOAM', 'ofplot', 'tests', 'pitzDaily', 'system', 'plotAllDirectories.py']
+Program Name :plotAllDirectories.py
+Folder Name:  system
+Parent Folder Name:  pitzDaily
+Grand Parent Folder Name:  tests
+Great Parent Folder Name:  ofplot
+There was an error opening the file!
+entering directory:  /home/dustin/OpenFOAM/ofplot/tests/pitzDaily2
+Full Path    :/home/dustin/OpenFOAM/ofplot/tests/pitzDaily2/plotAllDirectories.py
+List of Folders: ['', 'home', 'dustin', 'OpenFOAM', 'ofplot', 'tests', 'pitzDaily2', 'plotAllDirectories.py']
+Program Name :plotAllDirectories.py
+Folder Name:  pitzDaily2
+Parent Folder Name:  tests
+Grand Parent Folder Name:  ofplot
+Great Parent Folder Name:  OpenFOAM
+There was an error opening the file!
+entering directory:  /home/dustin/OpenFOAM/ofplot/tests/pitzDaily2/postProcessing
+Full Path    :/home/dustin/OpenFOAM/ofplot/tests/pitzDaily2/postProcessing/plotAllDirectories.py
+List of Folders: ['', 'home', 'dustin', 'OpenFOAM', 'ofplot', 'tests', 'pitzDaily2', 'postProcessing', 'plotAllDirectories.py']
+Program Name :plotAllDirectories.py
+Folder Name:  postProcessing
+Parent Folder Name:  pitzDaily2
+Grand Parent Folder Name:  tests
+Great Parent Folder Name:  ofplot
+There was an error opening the file!
+entering directory:  /home/dustin/OpenFOAM/ofplot/tests/pitzDaily2/postProcessing/sets
+Full Path    :/home/dustin/OpenFOAM/ofplot/tests/pitzDaily2/postProcessing/sets/plotAllDirectories.py
+List of Folders: ['', 'home', 'dustin', 'OpenFOAM', 'ofplot', 'tests', 'pitzDaily2', 'postProcessing', 'sets', 'plotAllDirectories.py']
+Program Name :plotAllDirectories.py
+Folder Name:  sets
+Parent Folder Name:  postProcessing
+Grand Parent Folder Name:  pitzDaily2
+Great Parent Folder Name:  tests
+There was an error opening the file!
+entering directory:  /home/dustin/OpenFOAM/ofplot/tests/pitzDaily2/postProcessing/sets/streamlines
+Full Path    :/home/dustin/OpenFOAM/ofplot/tests/pitzDaily2/postProcessing/sets/streamlines/plotAllDirectories.py
+List of Folders: ['', 'home', 'dustin', 'OpenFOAM', 'ofplot', 'tests', 'pitzDaily2', 'postProcessing', 'sets', 'streamlines', 'plotAllDirectories.py']
+Program Name :plotAllDirectories.py
+Folder Name:  streamlines
+Parent Folder Name:  sets
+Grand Parent Folder Name:  postProcessing
+Great Parent Folder Name:  pitzDaily2
+There was an error opening the file!
+entering directory:  /home/dustin/OpenFOAM/ofplot/tests/pitzDaily2/postProcessing/sets/streamlines/200
+Full Path    :/home/dustin/OpenFOAM/ofplot/tests/pitzDaily2/postProcessing/sets/streamlines/200/plotAllDirectories.py
+List of Folders: ['', 'home', 'dustin', 'OpenFOAM', 'ofplot', 'tests', 'pitzDaily2', 'postProcessing', 'sets', 'streamlines', '200', 'plotAllDirectories.py']
+Program Name :plotAllDirectories.py
+Folder Name:  200
+Parent Folder Name:  streamlines
+Grand Parent Folder Name:  sets
+Great Parent Folder Name:  postProcessing
+There was an error opening the file!
+entering directory:  /home/dustin/OpenFOAM/ofplot/tests/pitzDaily2/postProcessing/sets/streamlines/100
+Full Path    :/home/dustin/OpenFOAM/ofplot/tests/pitzDaily2/postProcessing/sets/streamlines/100/plotAllDirectories.py
+List of Folders: ['', 'home', 'dustin', 'OpenFOAM', 'ofplot', 'tests', 'pitzDaily2', 'postProcessing', 'sets', 'streamlines', '100', 'plotAllDirectories.py']
+Program Name :plotAllDirectories.py
+Folder Name:  100
+Parent Folder Name:  streamlines
+Grand Parent Folder Name:  sets
+Great Parent Folder Name:  postProcessing
+There was an error opening the file!
+entering directory:  /home/dustin/OpenFOAM/ofplot/tests/pitzDaily2/postProcessing/sets/streamlines/292
+Full Path    :/home/dustin/OpenFOAM/ofplot/tests/pitzDaily2/postProcessing/sets/streamlines/292/plotAllDirectories.py
+List of Folders: ['', 'home', 'dustin', 'OpenFOAM', 'ofplot', 'tests', 'pitzDaily2', 'postProcessing', 'sets', 'streamlines', '292', 'plotAllDirectories.py']
+Program Name :plotAllDirectories.py
+Folder Name:  292
+Parent Folder Name:  streamlines
+Grand Parent Folder Name:  sets
+Great Parent Folder Name:  postProcessing
+There was an error opening the file!
+entering directory:  /home/dustin/OpenFOAM/ofplot/tests/pitzDaily2/0
+Full Path    :/home/dustin/OpenFOAM/ofplot/tests/pitzDaily2/0/plotAllDirectories.py
+List of Folders: ['', 'home', 'dustin', 'OpenFOAM', 'ofplot', 'tests', 'pitzDaily2', '0', 'plotAllDirectories.py']
+Program Name :plotAllDirectories.py
+Folder Name:  0
+Parent Folder Name:  pitzDaily2
+Grand Parent Folder Name:  tests
+Great Parent Folder Name:  ofplot
+There was an error opening the file!
+entering directory:  /home/dustin/OpenFOAM/ofplot/tests/pitzDaily2/200
+Full Path    :/home/dustin/OpenFOAM/ofplot/tests/pitzDaily2/200/plotAllDirectories.py
+List of Folders: ['', 'home', 'dustin', 'OpenFOAM', 'ofplot', 'tests', 'pitzDaily2', '200', 'plotAllDirectories.py']
+Program Name :plotAllDirectories.py
+Folder Name:  200
+Parent Folder Name:  pitzDaily2
+Grand Parent Folder Name:  tests
+Great Parent Folder Name:  ofplot
+There was an error opening the file!
+entering directory:  /home/dustin/OpenFOAM/ofplot/tests/pitzDaily2/200/uniform
+Full Path    :/home/dustin/OpenFOAM/ofplot/tests/pitzDaily2/200/uniform/plotAllDirectories.py
+List of Folders: ['', 'home', 'dustin', 'OpenFOAM', 'ofplot', 'tests', 'pitzDaily2', '200', 'uniform', 'plotAllDirectories.py']
+Program Name :plotAllDirectories.py
+Folder Name:  uniform
+Parent Folder Name:  200
+Grand Parent Folder Name:  pitzDaily2
+Great Parent Folder Name:  tests
+There was an error opening the file!
+entering directory:  /home/dustin/OpenFOAM/ofplot/tests/pitzDaily2/constant
+Full Path    :/home/dustin/OpenFOAM/ofplot/tests/pitzDaily2/constant/plotAllDirectories.py
+List of Folders: ['', 'home', 'dustin', 'OpenFOAM', 'ofplot', 'tests', 'pitzDaily2', 'constant', 'plotAllDirectories.py']
+Program Name :plotAllDirectories.py
+Folder Name:  constant
+Parent Folder Name:  pitzDaily2
+Grand Parent Folder Name:  tests
+Great Parent Folder Name:  ofplot
+There was an error opening the file!
+entering directory:  /home/dustin/OpenFOAM/ofplot/tests/pitzDaily2/constant/polyMesh
+Full Path    :/home/dustin/OpenFOAM/ofplot/tests/pitzDaily2/constant/polyMesh/plotAllDirectories.py
+List of Folders: ['', 'home', 'dustin', 'OpenFOAM', 'ofplot', 'tests', 'pitzDaily2', 'constant', 'polyMesh', 'plotAllDirectories.py']
+Program Name :plotAllDirectories.py
+Folder Name:  polyMesh
+Parent Folder Name:  constant
+Grand Parent Folder Name:  pitzDaily2
+Great Parent Folder Name:  tests
+There was an error opening the file!
+entering directory:  /home/dustin/OpenFOAM/ofplot/tests/pitzDaily2/100
+Full Path    :/home/dustin/OpenFOAM/ofplot/tests/pitzDaily2/100/plotAllDirectories.py
+List of Folders: ['', 'home', 'dustin', 'OpenFOAM', 'ofplot', 'tests', 'pitzDaily2', '100', 'plotAllDirectories.py']
+Program Name :plotAllDirectories.py
+Folder Name:  100
+Parent Folder Name:  pitzDaily2
+Grand Parent Folder Name:  tests
+Great Parent Folder Name:  ofplot
+There was an error opening the file!
+entering directory:  /home/dustin/OpenFOAM/ofplot/tests/pitzDaily2/100/uniform
+Full Path    :/home/dustin/OpenFOAM/ofplot/tests/pitzDaily2/100/uniform/plotAllDirectories.py
+List of Folders: ['', 'home', 'dustin', 'OpenFOAM', 'ofplot', 'tests', 'pitzDaily2', '100', 'uniform', 'plotAllDirectories.py']
+Program Name :plotAllDirectories.py
+Folder Name:  uniform
+Parent Folder Name:  100
+Grand Parent Folder Name:  pitzDaily2
+Great Parent Folder Name:  tests
+There was an error opening the file!
+entering directory:  /home/dustin/OpenFOAM/ofplot/tests/pitzDaily2/292
+Full Path    :/home/dustin/OpenFOAM/ofplot/tests/pitzDaily2/292/plotAllDirectories.py
+List of Folders: ['', 'home', 'dustin', 'OpenFOAM', 'ofplot', 'tests', 'pitzDaily2', '292', 'plotAllDirectories.py']
+Program Name :plotAllDirectories.py
+Folder Name:  292
+Parent Folder Name:  pitzDaily2
+Grand Parent Folder Name:  tests
+Great Parent Folder Name:  ofplot
+There was an error opening the file!
+entering directory:  /home/dustin/OpenFOAM/ofplot/tests/pitzDaily2/292/uniform
+Full Path    :/home/dustin/OpenFOAM/ofplot/tests/pitzDaily2/292/uniform/plotAllDirectories.py
+List of Folders: ['', 'home', 'dustin', 'OpenFOAM', 'ofplot', 'tests', 'pitzDaily2', '292', 'uniform', 'plotAllDirectories.py']
+Program Name :plotAllDirectories.py
+Folder Name:  uniform
+Parent Folder Name:  292
+Grand Parent Folder Name:  pitzDaily2
+Great Parent Folder Name:  tests
+There was an error opening the file!
+entering directory:  /home/dustin/OpenFOAM/ofplot/tests/pitzDaily2/system
+Full Path    :/home/dustin/OpenFOAM/ofplot/tests/pitzDaily2/system/plotAllDirectories.py
+List of Folders: ['', 'home', 'dustin', 'OpenFOAM', 'ofplot', 'tests', 'pitzDaily2', 'system', 'plotAllDirectories.py']
+Program Name :plotAllDirectories.py
+Folder Name:  system
+Parent Folder Name:  pitzDaily2
+Grand Parent Folder Name:  tests
+Great Parent Folder Name:  ofplot
+There was an error opening the file!
