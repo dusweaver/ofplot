@@ -32,5 +32,5 @@ plot.post_process_test()
 plot.group_data()
 
 #plot.plot_by('time')
-plot.plot_by('case')
+plot.plot_lines('case')
 #plot.plot_by('sample')
