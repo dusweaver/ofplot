@@ -80,7 +80,7 @@ class Configuration:
                 #separate the directory paths into all folder names and then concantenate to the full case path
                 stringPath = os.path.realpath(directory)
                 folderNames = stringPath.split( os.path.sep )
-                casePaths = folderNames[-2] + '/' + folderNames[-1]
+                casePaths = '/'.join(folderNames[5:])
                 self.cases.append(casePaths)   
 
         os.chdir(self.home)
