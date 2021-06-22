@@ -17,7 +17,7 @@ class Configuration:
         else:
             self.target = target
 
-        if os.environ['WM_PROJECT_VERSION'][0] == 'v':
+        if os.environ['WM_PROJECT_VERSION'][0] == 'v' or os.environ['WM_PROJECT_VERSION'][0] == '5':
             self.version = 'COM'
         else:
             self.version = 'ORG'
@@ -269,6 +269,3 @@ class Configuration:
                 for key_field in self.fields:
                     self.create_sample_plane(case, key_loc, value_loc, key_field)
         print('Sample files generated')
-
-#Dustin notes:
-# Ability to use run_parallel('blockMesh') before Configuration is done because get_domain_size() required polymesh
