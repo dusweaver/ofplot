@@ -17,7 +17,7 @@ class Configuration:
         else:
             self.target = target
 
-        if os.environ['WM_PROJECT_VERSION'][0] == 'v' or os.environ['WM_PROJECT_VERSION'][0] == '5.x':
+        if os.environ['WM_PROJECT_VERSION'][0] == 'v' or os.environ['WM_PROJECT_VERSION'][0] == '5':
             self.version = 'COM'
         else:
             self.version = 'ORG'
@@ -67,7 +67,7 @@ class Configuration:
         if self.version == 'COM':
             string += 'type    uniform;' + '\n'
         else:
-            string += 'type    uniform;' + '\n'
+            string += 'type    lineUniform;' + '\n'
         string += 'axis    distance;' + '\n'
         string += 'nPoints 100;' + '\n'
         string += '}'
