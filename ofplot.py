@@ -1,12 +1,13 @@
 import glob
 import os
 import sys
-import shlex,subprocess
+import subprocess
 import numpy as np
 from matplotlib import pyplot as plt
 import PyFoam
 from PyFoam.Execution.UtilityRunner import UtilityRunner
 
+import os.path
 
 class Configuration:
     def __init__(self, target):
@@ -33,7 +34,9 @@ class Configuration:
         #name of sampling line files
         self.samplenames = []
 
-        self.read_files(self.target)
+        #self.read_files(self.target)
+        self.read_files_independent(self.target)
+
         self.decomposed = False
         self.run_parallel('blockMesh')
         self.get_domain_size()       
@@ -50,6 +53,7 @@ class Configuration:
 
     def read_files(self, target):
         all_files = glob.glob(f'{target}/*')
+        print(all_files)
         for file_ in all_files:
             if not os.path.isfile(file_):
                 self.cases.append(file_)
@@ -57,6 +61,29 @@ class Configuration:
             self.cases.remove(f'{target}/results')
         except:
             pass
+
+        print(self.cases)
+
+    def read_files_independent(self, target):
+        os.chdir(self.target)
+        path = (os.getcwd())
+
+        #gather all directories 
+        directories = [os.path.abspath(x[0]) for x in os.walk(path)]
+        directories.remove(os.path.abspath(path))
+
+        for directory in directories:
+
+            #Check if controlDict exists in the directory
+            caseCheck = directory + "/system/controlDict"            
+            if os.path.isfile(caseCheck):
+                #separate the directory paths into all folder names and then concantenate to the full case path
+                stringPath = os.path.realpath(directory)
+                folderNames = stringPath.split( os.path.sep )
+                casePaths = folderNames[-2] + '/' + folderNames[-1]
+                self.cases.append(casePaths)   
+
+        os.chdir(self.home)
 
     def create_sample_line(self, case, key_loc, value_loc, key_field):
         string  = f'//sample{key_loc}.cfg' + '\n'
@@ -258,8 +285,6 @@ class Configuration:
 
     def generate(self):
         for case in self.cases:
-            if not self.decomposed:
-                self.reconstruct_par(case)
             # Create sample lines
             for key_loc, value_loc in self.lines.items():
                 for key_field in self.fields:

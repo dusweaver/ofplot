@@ -14,8 +14,8 @@ plot = of.Configuration(target)
 plot.add_field('U', 0)  # vector
 
 plot.add_line(x=0.25, z=0.5, coord='rel')
-#plot.add_line(x=0.5, z=0.5, coord='rel')
-#plot.add_line(x=0.75, z=0.5, coord='rel')
+plot.add_line(x=0.5, z=0.5, coord='rel')
+plot.add_line(x=0.75, z=0.5, coord='rel')
 #plot.add_plane(x=0.0, y=0.5, z=0.0, normal='y')
 
 #plot.add_time(100)
