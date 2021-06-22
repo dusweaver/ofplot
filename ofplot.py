@@ -28,6 +28,7 @@ class Configuration:
         self.fields = {}
         self.lines = {}
         self.planes = {}
+        self.data = {}
 
         #name of sampling line files
         self.samplenames = []
@@ -115,7 +116,7 @@ class Configuration:
         os.chdir(self.home)
 
     def add_time(self, value):
-        self.times.append(value)
+        self.times.append(str(value))
         #solution = PyFoam.RunDictionary.SolutionDirectory.SolutionDirectory(self.target)
         #print(solution.getLast())
         #if value == 'latest':
@@ -200,33 +201,60 @@ class Configuration:
                     subprocess.run(args)
             os.chdir(self.home)
 
-    def groupByCase(self):
-        pass
-
-    def groupByTime(self):
-        pass
-
-    def groupBySample(self):
-        pass
-
-    def group_by(self):
-        grouped = []
+    def group_data(self):
         for case in self.cases:
-            for sample in self.samplenames:
-                samplesplit = sample.split('_')
-                samplename = samplesplit[1][:-1] + '_' + samplesplit[2] + '.xz'
+            times = {}
+            for time in self.times:
+                samples = {}
+                for sample in self.samplenames:
+                    samplesplit = sample.split('_')
+                    samplename = samplesplit[1][:-1] + '_' + samplesplit[2] + '.xy'
+                    data = np.loadtxt(case + '/postProcessing/' + sample + '/' + str(time) + '/' + samplename)
+                    samples[sample] = data
+                times[str(time)] = samples
+                print(case, time, sample, data[0])
+            self.data[case] = times
+
+    def plot_by(self, group):
+        os.makedirs('results', exist_ok=True)
+        if group == 'sample':
+            for case in self.cases:
                 for time in self.times:
-                    #print(case, sample, time)
-                    #data = np.loadtxt(case + '/postProcessing/' + sample + '/' + str(time) + '/' + samplename)
-                    # x, y = np.loadtxt(sample)
-                    # fig, ax = plt.subplots()
-                    # #ax.scatter(exp_x, exp_y_m[id_], label='EXP')
-                    # ax.scatter(x, y, label='CFD')
-                    # ax.legend(loc='best')
-                    # os.makedirs('results', exist_ok=True)
-                    # plt.savefig(f'results/{case}.png')
-                    pass
-        #print(data)
+                    fig, ax = plt.subplots()
+                    for sample in self.data[case][time]:
+                        transposed = np.transpose(self.data[case][time][sample])
+                        ax.scatter(transposed[0], transposed[1], label=sample)
+                        ax.set_title(f'{case} at time {time}')
+                        ax.legend(loc='best')
+                        folder = case.replace('/','_')
+                    plt.savefig(f'results/sample_{folder}_{sample}_{time}.png')
+                    plt.close(fig)
+
+        if group == 'time':
+            for case in self.cases:
+                for sample in self.samplenames:
+                    fig, ax = plt.subplots()
+                    for time in self.times:
+                        transposed = np.transpose(self.data[case][time][sample])
+                        ax.scatter(transposed[0], transposed[1], label=time)
+                        ax.set_title(f'{case} on {sample}')
+                        ax.legend(loc='best')
+                        folder = case.replace('/','_')
+                    plt.savefig(f'results/time_{folder}_{sample}_{time}.png')
+                    plt.close(fig)
+
+        if group == 'case':
+            for sample in self.samplenames:
+                for time in self.times:
+                    fig, ax = plt.subplots()
+                    for case in self.cases:
+                        transposed = np.transpose(self.data[case][time][sample])
+                        ax.scatter(transposed[0], transposed[1], label=case)
+                        ax.set_title(f'Sample {sample} at time {time}')
+                        ax.legend(loc='best')
+                        folder = case.replace('/','_')
+                    plt.savefig(f'results/cases_{folder}_{sample}_{time}.png')
+                    plt.close(fig)
 
     def generate(self):
         for case in self.cases:
