@@ -14,7 +14,6 @@ class Configuration:
         self.home = os.path.abspath('.')
         if target[-1] == '/':
             self.target = target[:-1]
-
         else:
             self.target = target
 
@@ -96,6 +95,13 @@ class Configuration:
 
         os.chdir(self.home)
 
+    def read_samples(self):
+        all_files = glob.glob(f'{self.target}/*/system/sample*')
+        for file_ in all_files:
+            if os.path.isfile(file_):
+                filename = file_.split('/')[-1]
+                self.samplenames.append(filename)
+
     def create_sample_line(self, case, key_loc, value_loc, key_field):
         string  = f'//sample{key_loc}.cfg' + '\n'
         string += 'interpolationScheme cellPointFace;' + '\n'
@@ -108,7 +114,7 @@ class Configuration:
             string += 'type    lineUniform;' + '\n'
         string += 'axis    distance;' + '\n'
         string += 'nPoints 100;' + '\n'
-        string += '}'
+        string += '}' + '\n'
         string += f'start   ({value_loc[0][0]} {value_loc[1][0]} {value_loc[2][0]});' + '\n'
         string += f'end     ({value_loc[0][1]} {value_loc[1][1]} {value_loc[2][1]});' + '\n'
         string += f'fields  ({key_field});' + '\n'
@@ -117,7 +123,6 @@ class Configuration:
         filename = f'sample_{key_loc}_{key_field}'
         with open(case+'/system/'+filename, 'w') as f:
             f.write(string)
-        self.samplenames.append(filename)
 
     def create_sample_plane(self, case, key_loc, value_loc, key_field):
         string  = f'//sample{key_loc}.cfg' + '\n'
@@ -143,7 +148,6 @@ class Configuration:
         filename = f'sample_{key_loc}_{key_field}'
         with open(case+'/system/'+filename, 'w') as f:
             f.write(string)
-        self.samplenames.append(filename)
 
     def reconstruct_par(self, case):
         os.chdir(case)
@@ -154,22 +158,19 @@ class Configuration:
         os.chdir(self.home)
 
     def add_time(self, value):
-        self.times.append(str(value))
-        #solution = PyFoam.RunDictionary.SolutionDirectory.SolutionDirectory(self.target)
-        #print(solution.getLast())
-        #if value == 'latest':
-            #self.times.append(solution.getLast())
-        #elif value == 'first':
-            #self.times.append(solution.getFirst())
-        #elif value == 'all':
-            #if self.reconstructed:
-                #self.times.append(solution.getTimes())
-            #else:
-                #self.times.append(solution.getParallelTimes())
-        #elif isinstance(value, int):
-            #self.times.append(value)
-        #else:
-            #print('Time not found: ', value)
+        value = str(value)
+        solution = PyFoam.RunDictionary.SolutionDirectory.SolutionDirectory(self.cases[0])
+        if value == 'latest':
+            self.times.append(solution.getLast())
+        elif value == 'first':
+            self.times.append(solution.getFirst())
+        elif value == 'all':
+            if self.reconstructed:
+                self.times.append(solution.getTimes())
+            else:
+                self.times.append(solution.getParallelTimes())
+        else:
+            self.times.append(value)
 
     def add_field(self, value, col=1):
         self.fields[value] = col
@@ -217,7 +218,6 @@ class Configuration:
         args = ['parallel', command, '-case', ':::'] + self.cases
         subprocess.run(args)
 
-    #in theory this nested parallel script should work but haven't tried because I need self.samplenames
     def post_process(self):
         args = ['parallel', self.run_parallel('postProcess'), '-time', ':::'] + self.samplenames
         subprocess.run(args)
@@ -246,20 +246,32 @@ class Configuration:
                 samples = {}
                 for sample in self.samplenames:
                     samplesplit = sample.split('_')
-                    samplename = samplesplit[1][:-1] + '_' + samplesplit[2] + '.xy'
+                    # line_alpha.water.raw
+                    if 'line' in sample:
+                        samplename = samplesplit[1][:-1] + '_' + samplesplit[2] + '.xy'
+                    elif 'plane' in sample:
+                        samplename = samplesplit[2] + '_' + samplesplit[1][:-1] + '.raw'
+                    else:
+                        print('Unknown sample type')
+                        sys.exit()
                     data = np.loadtxt(case + '/postProcessing/' + sample + '/' + str(time) + '/' + samplename)
                     samples[sample] = data
                 times[str(time)] = samples
                 print(case, time, sample, data[0])
             self.data[case] = times
 
-    def plot_by(self, group):
+    def plot_lines(self, group):
+        ''' Plot lines grouped by conditions:
+        group by 'sample', 'time' and 'case'
+        '''
         os.makedirs('results', exist_ok=True)
         if group == 'sample':
             for case in self.cases:
                 for time in self.times:
                     fig, ax = plt.subplots()
                     for sample in self.data[case][time]:
+                        if 'plane' in sample:
+                            continue
                         transposed = np.transpose(self.data[case][time][sample])
                         ax.scatter(transposed[0], transposed[1], label=sample)
                         ax.set_title(f'{case} at time {time}')
@@ -271,6 +283,8 @@ class Configuration:
         if group == 'time':
             for case in self.cases:
                 for sample in self.samplenames:
+                    if 'plane' in sample:
+                        continue
                     fig, ax = plt.subplots()
                     for time in self.times:
                         transposed = np.transpose(self.data[case][time][sample])
@@ -283,6 +297,8 @@ class Configuration:
 
         if group == 'case':
             for sample in self.samplenames:
+                if 'plane' in sample:
+                    continue
                 for time in self.times:
                     fig, ax = plt.subplots()
                     for case in self.cases:
@@ -294,7 +310,49 @@ class Configuration:
                     plt.savefig(f'results/cases_{folder}_{sample}_{time}.png')
                     plt.close(fig)
 
+    def plot_plane(self):
+        ''' Plot extracted surface from plane sampling
+        '''
+        os.makedirs('results', exist_ok=True)
+        for case in self.cases:
+            for time in self.times:
+                fig, ax = plt.subplots()
+                for sample in self.data[case][time]:
+                    if 'line' in sample:
+                        continue
+                    results = self.extract_interface(self.data[case][time][sample])
+                    ax.scatter(results[0], results[1], label=sample)
+                    ax.set_title(f'{case} at time {time}')
+                    ax.legend(loc='best')
+                    folder = case.replace('/','_')
+                plt.savefig(f'results/sample_{folder}_{sample}_{time}.png')
+                plt.close(fig)
+
+    def extract_interface(self, data):
+        #data = np.loadtxt(sys.argv[1])
+        dataT = np.transpose(data)
+        print(dataT)
+        dataT = data
+        # get uniques
+        x = np.unique(dataT[0])
+        z = np.unique(dataT[2])
+
+        interface  = 0.5
+
+        results = []
+
+        for i in x:
+            idx = np.where(dataT[0] == i)
+            values_z = dataT[2][idx]
+            #sorted_z = np.argsort(values_z)
+            values_field = dataT[3][idx]
+            closest = np.argmin(np.abs(values_field-interface))
+            results.append([i, values_z[closest]])
+        print(results)
+        return results
+
     def generate(self):
+        self.read_samples()
         for case in self.cases:
             # Create sample lines
             for key_loc, value_loc in self.lines.items():
