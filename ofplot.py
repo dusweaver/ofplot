@@ -6,6 +6,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 import PyFoam
 from PyFoam.Execution.UtilityRunner import UtilityRunner
+import pickle
 
 import os.path
 
@@ -101,6 +102,8 @@ class Configuration:
             if os.path.isfile(file_):
                 filename = file_.split('/')[-1]
                 self.samplenames.append(filename)
+        # remove repeated sample names
+        self.samplenames = list(set(self.samplenames))
 
     def create_sample_line(self, case, key_loc, value_loc, key_field):
         string  = f'//sample{key_loc}.cfg' + '\n'
@@ -259,6 +262,8 @@ class Configuration:
                 times[str(time)] = samples
                 print(case, time, sample, data[0])
             self.data[case] = times
+            # save all data as a file
+            pickle.dump(self.data, open('data_dump.pkl', 'wb'))
 
     def plot_lines(self, group):
         ''' Plot lines grouped by conditions:
@@ -354,6 +359,9 @@ class Configuration:
     def generate(self):
         self.read_samples()
         for case in self.cases:
+            # Reconstruct parallel cases
+            if not self.decomposed:
+                self.reconstruct_par(case)
             # Create sample lines
             for key_loc, value_loc in self.lines.items():
                 for key_field in self.fields:
