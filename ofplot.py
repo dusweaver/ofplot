@@ -99,6 +99,8 @@ class Configuration:
         self.samplenames = list(set(self.samplenames))
 
     def create_sample_line(self, case, key_loc, value_loc, key_field):
+
+            
         string  = f'//sample{key_loc}.cfg' + '\n'
         string += 'interpolationScheme cellPointFace;' + '\n'
         string += 'setFormat   raw;' + '\n'
@@ -121,6 +123,8 @@ class Configuration:
             f.write(string)
 
     def create_sample_plane(self, case, key_loc, value_loc, key_field):
+        if len(self.domain) == 0:
+            self.get_domain_size()
         string  = f'//sample{key_loc}.cfg' + '\n'
 
         string += f'interpolationScheme cell;' + '\n'
@@ -172,6 +176,10 @@ class Configuration:
         self.fields[value] = col
     
     def add_line(self, x='length', y='length', z='length', coord='rel'):
+
+        if not len(self.domain):
+            self.get_domain_size()
+
         current = f'line{len(self.lines)}'
         if coord == 'rel':
             x, y, z = self.convert_relative(x, y, z)

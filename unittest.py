@@ -9,13 +9,12 @@ else:
 plot = of.Configuration(target)
 plot.decomposed = True
 
-plot.run_parallel('blockMesh')
+#plot.run_parallel('blockMesh')
 #plot.run_parallel('simpleFoam')
 
 #plot.add_field('p')  # scalar
 plot.add_field('U', 0)  # vector
-
-plot.get_domain_size()  
+ 
 plot.add_line(x=0.25, z=0.5, coord='rel')
 # plot.add_line(x=0.5, z=0.5, coord='rel')
 # plot.add_line(x=0.75, z=0.5, coord='rel')
