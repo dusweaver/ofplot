@@ -30,16 +30,9 @@ class Configuration:
         self.lines = {}
         self.planes = {}
         self.data = {}
-
-        #name of sampling line files
         self.samplenames = []
-
         #self.read_files(self.target)
-        self.read_files_independent(self.target)
-
-        self.decomposed = False
-        self.run_parallel('blockMesh')
-        self.get_domain_size()       
+        self.read_files_independent(self.target)     
 
     def get_domain_size(self):
         os.chdir(self.cases[0])
