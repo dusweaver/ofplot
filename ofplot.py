@@ -97,7 +97,7 @@ class Configuration:
         os.chdir(self.home)
 
     def read_samples(self):
-        all_files = glob.glob(f'{self.target}/*/system/sample*')
+        all_files = glob.glob(f'{self.target}/*/system/sample_*')
         for file_ in all_files:
             if os.path.isfile(file_):
                 filename = file_.split('/')[-1]
@@ -249,14 +249,12 @@ class Configuration:
                 samples = {}
                 for sample in self.samplenames:
                     samplesplit = sample.split('_')
-                    # line_alpha.water.raw
                     if 'line' in sample:
                         samplename = samplesplit[1][:-1] + '_' + samplesplit[2] + '.xy'
                     elif 'plane' in sample:
                         samplename = samplesplit[2] + '_' + samplesplit[1][:-1] + '.raw'
                     else:
                         print('Unknown sample type')
-                        sys.exit()
                     data = np.loadtxt(case + '/postProcessing/' + sample + '/' + str(time) + '/' + samplename)
                     samples[sample] = data
                 times[str(time)] = samples
