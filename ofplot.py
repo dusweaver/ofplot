@@ -30,16 +30,9 @@ class Configuration:
         self.lines = {}
         self.planes = {}
         self.data = {}
-
-        #name of sampling line files
         self.samplenames = []
-
         #self.read_files(self.target)
-        self.read_files_independent(self.target)
-
-        self.decomposed = False
-        self.run_parallel('blockMesh')
-        self.get_domain_size()       
+        self.read_files_independent(self.target)     
 
     def get_domain_size(self):
         os.chdir(self.cases[0])
@@ -105,7 +98,7 @@ class Configuration:
         # remove repeated sample names
         self.samplenames = list(set(self.samplenames))
 
-    def create_sample_line(self, case, key_loc, value_loc, key_field):
+    def create_sample_line(self, case, key_loc, value_loc, key_field):  
         string  = f'//sample{key_loc}.cfg' + '\n'
         string += 'interpolationScheme cellPointFace;' + '\n'
         string += 'setFormat   raw;' + '\n'
@@ -129,7 +122,6 @@ class Configuration:
 
     def create_sample_plane(self, case, key_loc, value_loc, key_field):
         string  = f'//sample{key_loc}.cfg' + '\n'
-
         string += f'interpolationScheme cell;' + '\n'
         string += f'surfaceFormat raw;' + '\n'
         string += f'type surfaces;' + '\n'
@@ -179,6 +171,10 @@ class Configuration:
         self.fields[value] = col
     
     def add_line(self, x='length', y='length', z='length', coord='rel'):
+
+        if not len(self.domain):
+            self.get_domain_size()
+
         current = f'line{len(self.lines)}'
         if coord == 'rel':
             x, y, z = self.convert_relative(x, y, z)
@@ -193,6 +189,9 @@ class Configuration:
             print(f'Bad location definition: {x} {y} {z}')
 
     def add_plane(self, x, y, z, normal, coord='rel'):
+        if not len(self.domain):
+            self.get_domain_size()
+
         current = f'plane{len(self.planes)}'
 
         if coord == 'rel':
