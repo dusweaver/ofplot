@@ -7,6 +7,8 @@ from matplotlib import pyplot as plt
 import PyFoam
 from PyFoam.Execution.UtilityRunner import UtilityRunner
 import pickle
+import multiprocessing
+
 
 import os.path
 
@@ -352,6 +354,40 @@ class Configuration:
             results.append([i, values_z[closest]])
         print(results)
         return results
+
+
+    # function to run all CFDEM cases inside of a given directory in serial,parallel or a combination
+    # numSplits is how many cases are run at the same time
+    def run_CFDEM(self, numSplits = 2):
+        cases_parallel = []
+        i=0
+        numSplitsTemp = numSplits
+        while i < len(self.cases)-1:
+            numSplits = numSplitsTemp
+            #run in serial if numSplits =1; otherwise gather names for parallel
+            if numSplits == 1:
+                os.chdir(self.cases[i])
+                os.chdir("..")
+                print(os.getcwd())
+                args = ['bash', 'Allrun.sh'] 
+                subprocess.run(args)
+                i=i+1
+            else:
+                while numSplits !=0:
+                    os.chdir(self.home)
+                    os.chdir(self.cases[i])
+                    os.chdir("..")
+                    thePath = os.getcwd() + '/Allrun.sh'
+                    cases_parallel.append(thePath)
+                    i=i+1
+                    numSplits = numSplits-1
+                args = ['parallel' , ':::'] + cases_parallel
+                subprocess.run(args)
+
+                print(cases_parallel)
+                cases_parallel.clear()
+            os.chdir(self.home)
+
 
     def generate(self):
         self.read_samples()
