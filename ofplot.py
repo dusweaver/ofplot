@@ -389,6 +389,56 @@ class Configuration:
             os.chdir(self.home)
 
 
+    def run_command_allcases(self, command):
+        print(command)
+        for case in self.cases:
+            os.chdir(case)
+            subprocess.run(command,shell=True)
+            os.chdir(self.home)
+    def run_OFCase_serial(self, solver = 'pimpleFoam', proc=50):
+
+        for case in self.cases:
+            os.chdir(case)
+            print(os.getcwd())
+            args = ['mpirun', '-np', str(proc) , 'pimpleFoam', '-parallel']
+            subprocess.run(args)
+            os.chdir(self.home)
+        os.chdir(self.home)
+
+
+    def run_OFCase_parallel(self, solver = 'pimpleFoam', proc=2, numSplits = 2):
+        cases_parallel = []
+        i = 0
+        numSplitsTemp = numSplits
+        print("the number of cases: ", len(self.cases))
+        print("The cases are: ", ' '.join(self.cases))
+        while i < len(self.cases) - 1:
+            numSplits = numSplitsTemp
+            while numSplits > 1:
+                
+                print("running case: ", self.cases[i])
+                try:
+                    os.chdir(self.home)
+                    os.chdir(self.cases[i])
+                    subprocess.Popen('mpirun -np ' + str(proc) + ' pimpleFoam -parallel |tee logThatShit.txt', shell=True, stdout=open('stdout.txt', 'wb'), stderr=open('stderr.txt', 'wb'))
+                except:
+                    print('There was an error in running initial splits')
+                i=i+1
+                numSplits = numSplits-1
+
+            print("calling last case of set: ", self.cases[i])
+            try:
+                os.chdir(self.home)
+                os.chdir(self.cases[i])
+                subprocess.call('mpirun -np ' + str(proc) + '  pimpleFoam -parallel |tee logThatShit.txt', shell=True, stdout=open('stdout.txt', 'wb'), stderr=open('stderr.txt', 'wb'))
+                i=i+1
+                print("moving on to next set of cases\n")
+            except:
+                print('there was an error in running the last split')
+            
+            cases_parallel.clear()
+            os.chdir(self.home)
+
     def generate(self):
         self.read_samples()
         for case in self.cases:
@@ -404,3 +454,4 @@ class Configuration:
                 for key_field in self.fields:
                     self.create_sample_plane(case, key_loc, value_loc, key_field)
         print('Sample files generated')
+
