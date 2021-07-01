@@ -363,6 +363,7 @@ class Configuration:
 
     def run_cases(self, solver , max_processors = 0):
 
+        #checks solver name to determine if it is a CFDEM solver or not and then sets a flag
         if re.search(r'cfdemSolver',solver):
             print("running cases using the cfdem solver: ", solver)
             cfdemFlag = True
@@ -370,7 +371,7 @@ class Configuration:
             print("running cases using OpenFoam solver: ", solver)
             cfdemFlag =False
 
-
+        #checks if user specified max_processors or not.
         if max_processors ==0:
             num_cpus_system = multiprocessing.cpu_count()
             print("no user specified max cpus set. setting to sensed cpu count:", num_cpus_system)
@@ -398,7 +399,7 @@ class Configuration:
 
             
             if num_cpus_case <= num_cpus_avail:
-                print('\nnumber of cpus available', num_cpus_avail)
+                print('\n\nnumber of cpus available', num_cpus_avail)
                 print('number of required for case', num_cpus_case)
                 print("we have enough cpus for case: ", self.cases[i])
                 print('opening process for case: ',self.cases[i])
@@ -413,14 +414,22 @@ class Configuration:
                   args = ['mpirun', '-np', str(num_cpus_case), solver, '-parallel']
 
                 print('running the case in: ', os.getcwd())
-                
-                subprocess.Popen(args,stdout=open('stdout.txt', 'wb'), stderr=open('stderr.txt', 'wb'))
-                time.sleep(10)
+
+                #this if statement is used so that the code doesn't continue on when it gets to the last case. using "call"
+                #waits for the process to finish
+                if i == len(self.cases)-1:
+                    print('this is the last case....')
+                    subprocess.call(args,stdout=open('stdout.txt', 'wb'), stderr=open('stderr.txt', 'wb'))
+                else:
+                    subprocess.Popen(args,stdout=open('stdout.txt', 'wb'), stderr=open('stderr.txt', 'wb'))
+
+                time.sleep(1)
                 i=i+1
+                print('\n')
             else:
                 print ('not enough cpus for case:', self.cases[i], 'needed:',num_cpus_case, 'avail:',num_cpus_avail, end="\r")
                 #print('.', end='', flush=True)
-                time.sleep(10)
+                time.sleep(5)
                 pass
             
             os.chdir(self.home)
