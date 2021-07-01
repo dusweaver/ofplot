@@ -9,6 +9,10 @@ from PyFoam.Execution.UtilityRunner import UtilityRunner
 import pickle
 import multiprocessing
 
+import re
+import time
+import psutil 
+
 import os.path
 
 class Configuration:
@@ -357,38 +361,99 @@ class Configuration:
         print(results)
         return results
 
-    # function to run all CFDEM cases inside of a given directory in serial,parallel or a combination
-    # numSplits is how many cases are run at the same time
-    def run_CFDEM(self, numSplits = 2):
-        cases_parallel = []
+
+    def run_CFDEM(self, max_processors = 0):
+        print("Running CFDEM cases\n")
+
+        if max_processors ==0:
+            num_cpus_system = multiprocessing.cpu_count()
+            print("setting system cpu count to sensed value of:", num_cpus_system)
+        else:
+            
+            num_cpus_system = max_processors
+            print("using specified maximum number of processors instead of what was read from system: ", num_cpus_system)
+
         i=0
-        numSplitsTemp = numSplits
-        while i < len(self.cases)-1:
-            numSplits = numSplitsTemp
-            #run in serial if numSplits =1; otherwise gather names for parallel
-            if numSplits == 1:
+        while i < len(self.cases):
+            os.chdir(self.home)
+            #capture the number of processes using the command cfdemSolver and output to result.stdout and result.stderr
+            #note this also includes the process running itself which is 2 processes
+            result = subprocess.run("ps -aF | grep 'cfdemSolver\|-parallel' | wc -l", shell=True,capture_output=True)
+            #filter out only the digits using re
+            try:
+                num_cpus_avail = num_cpus_system - int(re.sub('\D', '', str(result.stdout)))+2
+            except Exception:
+                print("was unable to convert the bytes data output to a string")
+
+            #get the number of cpus used by decomposeParDict
+            num_cpus_case = self.read_value_from_file(self.cases[i],'system/decomposeParDict', 'numberOfSubdomains')
+            # print('number of cpus for the case', num_cpus_case)
+
+            
+            if num_cpus_case <= num_cpus_avail:
+                print('\nnumber of cpus available', num_cpus_avail)
+                print('number of required for case', num_cpus_case)
+                print("we have enough cpus for case: ", self.cases[i])
+                print('opening process for case: ',self.cases[i])
+                #go up a directory to CFDEM case
+                os.chdir(self.home)
                 os.chdir(self.cases[i])
                 os.chdir("..")
-                print(os.getcwd())
-                args = ['bash', 'Allrun.sh'] 
-                subprocess.run(args)
+                print('running the case in: ', os.getcwd())
+                args = ['bash', 'Allrun.sh']
+                subprocess.Popen(args,stdout=open('stdout.txt', 'wb'), stderr=open('stderr.txt', 'wb'))
+                time.sleep(60)
                 i=i+1
             else:
-                while numSplits !=0:
-                    os.chdir(self.home)
-                    os.chdir(self.cases[i])
-                    os.chdir("..")
-                    thePath = os.getcwd() + '/Allrun.sh'
-                    cases_parallel.append(thePath)
-                    i=i+1
-                    numSplits = numSplits-1
-                args = ['parallel' , ':::'] + cases_parallel
-                subprocess.run(args)
-
-                print(cases_parallel)
-                cases_parallel.clear()
-
+                print ('not enough cpus for case:', self.cases[i], 'needed:',num_cpus_case, 'avail:',num_cpus_avail, end="\r")
+                #print('.', end='', flush=True)
+                time.sleep(300)
+                pass
+            
             os.chdir(self.home)
+
+
+    #This function is created to read the a value from a link starting with a string
+    #case: Case path from self.home
+    #file: file path from case folder i.e. system/decomposePar
+    #starts_with: what the line in the file starts with (a string)
+    #colume_number: once the line is determined from start_wish the code splits the line into columns
+
+    def read_value_from_file(self,case,file,starts_with, column_number = 1,log = 0):
+
+        if log == 1:
+            print('\nReading value from file')
+            print('case:',case)
+            print('file:',file)
+            print('starting with:',starts_with)
+            print('value number',column_number)
+        os.chdir(case)
+
+        try:
+            #read all lines in the specified file
+            lines = [line for line in open(file,'r')]
+            #run through all the lines and if it starts with a phrase then something happens
+            for line in lines:
+                if line.startswith(starts_with):
+                    if log == 1:
+                        print('\nthe recognized line is: ', line)
+                    try:
+                        value = line.split()[column_number]
+                        #filter out only the digits using re
+                        value = int(re.sub('\D', '', value))
+                        if log ==1:
+                            print('the returned value is: ',value)
+                        return value
+                    except Exception:
+                        print('there was an error reading the value in column:',column_number)
+            os.chdir(self.home)         
+        except Exception:
+            print('There was an error in reading the file or string to replace value for case: ', case)
+            os.chdir(self.home)
+
+        os.chdir(self.home)
+
+
 
     def run_command_allcases(self, command):
         print(command)
@@ -441,6 +506,7 @@ class Configuration:
             
             cases_parallel.clear()
             os.chdir(self.home)
+
 
     def generate(self):
         self.read_samples()
