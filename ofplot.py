@@ -9,6 +9,9 @@ from PyFoam.Execution.UtilityRunner import UtilityRunner
 import pickle
 import multiprocessing
 
+import re
+import time
+import psutil 
 
 import os.path
 
@@ -34,6 +37,7 @@ class Configuration:
         self.data = {}
         self.samplenames = []
         #self.read_files(self.target)
+        self.decomposed = True
         self.read_files_independent(self.target)     
 
     def get_domain_size(self):
@@ -46,18 +50,6 @@ class Configuration:
                        [float(a[3]), float(a[4]), float(a[5])]]
         os.chdir(self.home)
 
-    def read_files(self, target):
-        all_files = glob.glob(f'{target}/*')
-        print(all_files)
-        for file_ in all_files:
-            if not os.path.isfile(file_):
-                self.cases.append(file_)
-        try:
-            self.cases.remove(f'{target}/results')
-        except:
-            pass
-
-        print(self.cases)
 
     def read_files_independent(self, target):
         os.chdir(self.target)
@@ -88,16 +80,17 @@ class Configuration:
 
                 self.cases.append(casePath)
    
-
+        print('the case names are: ', self.cases)
         os.chdir(self.home)
 
     def read_samples(self):
-        all_files = glob.glob(f'{self.target}/*/system/sample_*')
-        for file_ in all_files:
-            if os.path.isfile(file_):
-                filename = file_.split('/')[-1]
-                self.samplenames.append(filename)
-        # remove repeated sample names
+        for case in self.cases:
+            all_files = glob.glob(f'{case}/system/sample*')
+            for file_ in all_files:
+                if os.path.isfile(file_):
+                    filename = file_.split('/')[-1]
+                    self.samplenames.append(filename)
+            # remove repeated sample names
         self.samplenames = list(set(self.samplenames))
 
     def create_sample_line(self, case, key_loc, value_loc, key_field):  
@@ -169,6 +162,8 @@ class Configuration:
         else:
             self.times.append(value)
 
+        print("times added: ", self.times)
+
     def add_field(self, value, col=1):
         self.fields[value] = col
     
@@ -222,16 +217,19 @@ class Configuration:
         args = ['parallel', command, '-case', ':::'] + self.cases
         subprocess.run(args)
 
-    def post_process(self):
-        args = ['parallel', self.run_parallel('postProcess'), '-time', ':::'] + self.samplenames
-        subprocess.run(args)
-
-    def post_process_test(self):
+    def post_process(self,timed=all):
         for case in self.cases:
+            print("running postProcess for case: ", case)
             os.chdir(case)
-            for time in self.times:
-                args = ['parallel', 'postProcess', '-time', str(time), '-func', ':::'] + self.samplenames
+            print(self.times)
+            if not self.times:
+                print("no times added postProcessing all times...")
+                args = ['parallel', 'postProcess', '-func', ':::'] + self.samplenames
                 subprocess.run(args)
+            else:
+                for time in self.times:
+                    args = ['parallel', 'postProcess', '-time', str(time), '-func', ':::'] + self.samplenames
+                    subprocess.run(args)
             os.chdir(self.home)
         
     def post_process_single(self):
@@ -244,23 +242,31 @@ class Configuration:
             os.chdir(self.home)
 
     def group_data(self):
+        print("grouping data")
         for case in self.cases:
             times = {}
-            for time in self.times:
-                samples = {}
-                for sample in self.samplenames:
-                    samplesplit = sample.split('_')
-                    if 'line' in sample:
-                        samplename = samplesplit[1][:-1] + '_' + samplesplit[2] + '.xy'
-                    elif 'plane' in sample:
-                        samplename = samplesplit[2] + '_' + samplesplit[1][:-1] + '.raw'
-                    else:
-                        print('Unknown sample type')
-                    data = np.loadtxt(case + '/postProcessing/' + sample + '/' + str(time) + '/' + samplename)
-                    samples[sample] = data
-                times[str(time)] = samples
-                print(case, time, sample, data[0])
-            self.data[case] = times
+            try: 
+                print("reading sampling files from case: ", case)
+                for time in self.times:
+                    samples = {}
+                    for sample in self.samplenames:
+                        samplesplit = sample.split('_')
+                        print(samplesplit)
+                        #this requires that the names be in a particular format.
+                        if 'line' in sample:
+                            samplename = samplesplit[1][:-1] + '_' + samplesplit[2] + '.xy'
+                        elif 'plane' in sample:
+                            samplename = samplesplit[2] + '_' + samplesplit[1][:-1] + '.raw'
+                        else:
+                            print('Unknown sample type')
+                        #This requires that the time is the same for each of the cases (it would be awesome to just use the latest Time)
+                        data = np.loadtxt(case + '/postProcessing/' + sample + '/' + str(time) + '/' + samplename)
+                        samples[sample] = data
+                    times[str(time)] = samples
+                    print(case, time, sample, data[0])
+                self.data[case] = times
+            except Exception:
+                print("there was an error reading one of your data sampling files")
             # save all data as a file
             pickle.dump(self.data, open('data_dump.pkl', 'wb'))
 
@@ -355,42 +361,178 @@ class Configuration:
         print(results)
         return results
 
+    def run_cases(self, solver , max_processors = 0):
 
-    # function to run all CFDEM cases inside of a given directory in serial,parallel or a combination
-    # numSplits is how many cases are run at the same time
-    def run_CFDEM(self, numSplits = 2):
-        cases_parallel = []
+        #checks solver name to determine if it is a CFDEM solver or not and then sets a flag
+        if re.search(r'cfdemSolver',solver):
+            print("running cases using the cfdem solver: ", solver)
+            cfdemFlag = True
+        else:
+            print("running cases using OpenFoam solver: ", solver)
+            cfdemFlag =False
+
+        #checks if user specified max_processors or not.
+        if max_processors ==0:
+            num_cpus_system = multiprocessing.cpu_count()
+            print("no user specified max cpus set. setting to sensed cpu count:", num_cpus_system)
+        else:
+            
+            num_cpus_system = max_processors
+            print("setting maximum cpus to user specified value: ", num_cpus_system)
+
         i=0
-        numSplitsTemp = numSplits
-        while i < len(self.cases)-1:
-            numSplits = numSplitsTemp
-            #run in serial if numSplits =1; otherwise gather names for parallel
-            if numSplits == 1:
+        while i < len(self.cases):
+            os.chdir(self.home)
+            #capture the number of processes using the command cfdemSolver and output to result.stdout and result.stderr
+            #note this also includes the process running itself which is 2 processes
+            linux_command = "ps -aF | grep ' " + str(solver) + " ' | wc -l"
+            result = subprocess.run(linux_command, shell=True,capture_output=True)
+            #filter out only the digits using re
+            try:
+                num_cpus_avail = num_cpus_system - int(re.sub('\D', '', str(result.stdout)))+2
+            except Exception:
+                print("was unable to convert the bytes data output to a string")
+
+            #get the number of cpus used by decomposeParDict
+            num_cpus_case = self.read_value_from_file(self.cases[i],'system/decomposeParDict', 'numberOfSubdomains')
+            # print('number of cpus for the case', num_cpus_case)
+
+            
+            if num_cpus_case <= num_cpus_avail:
+                print('\n\nnumber of cpus available', num_cpus_avail)
+                print('number of required for case', num_cpus_case)
+                print("we have enough cpus for case: ", self.cases[i])
+                print('opening process for case: ',self.cases[i])
+                #go up a directory to CFDEM case
+                os.chdir(self.home)
                 os.chdir(self.cases[i])
-                os.chdir("..")
-                print(os.getcwd())
-                args = ['bash', 'Allrun.sh'] 
-                subprocess.run(args)
+
+                if cfdemFlag:
+                  os.chdir("..")
+                  args = ['bash', 'Allrun.sh']
+                else:
+                  args = ['mpirun', '-np', str(num_cpus_case), solver, '-parallel']
+
+                print('running the case in: ', os.getcwd())
+
+                #this if statement is used so that the code doesn't continue on when it gets to the last case. using "call"
+                #waits for the process to finish
+                if i == len(self.cases)-1:
+                    print('this is the last case....')
+                    subprocess.call(args,stdout=open('stdout.txt', 'wb'), stderr=open('stderr.txt', 'wb'))
+                else:
+                    subprocess.Popen(args,stdout=open('stdout.txt', 'wb'), stderr=open('stderr.txt', 'wb'))
+
+                time.sleep(1)
                 i=i+1
+                print('\n')
             else:
-                while numSplits !=0:
+                print ('not enough cpus for case:', self.cases[i], 'needed:',num_cpus_case, 'avail:',num_cpus_avail, end="\r")
+                #print('.', end='', flush=True)
+                time.sleep(5)
+                pass
+            
+            os.chdir(self.home)
+
+
+    #This function is created to read the a value from a link starting with a string
+    #case: Case path from self.home
+    #file: file path from case folder i.e. system/decomposePar
+    #starts_with: what the line in the file starts with (a string)
+    #colume_number: once the line is determined from start_wish the code splits the line into columns
+
+    def read_value_from_file(self,case,file,starts_with, column_number = 1,log = 0):
+
+        if log == 1:
+            print('\nReading value from file')
+            print('case:',case)
+            print('file:',file)
+            print('starting with:',starts_with)
+            print('value number',column_number)
+        os.chdir(case)
+
+        try:
+            #read all lines in the specified file
+            lines = [line for line in open(file,'r')]
+            #run through all the lines and if it starts with a phrase then something happens
+            for line in lines:
+                if line.startswith(starts_with):
+                    if log == 1:
+                        print('\nthe recognized line is: ', line)
+                    try:
+                        value = line.split()[column_number]
+                        #filter out only the digits using re
+                        value = int(re.sub('\D', '', value))
+                        if log ==1:
+                            print('the returned value is: ',value)
+                        return value
+                    except Exception:
+                        print('there was an error reading the value in column:',column_number)
+            os.chdir(self.home)         
+        except Exception:
+            print('There was an error in reading the file or string to replace value for case: ', case)
+            os.chdir(self.home)
+
+        os.chdir(self.home)
+
+
+
+    def run_command_allcases(self, command):
+        print(command)
+        for case in self.cases:
+            os.chdir(case)
+            subprocess.run(command,shell=True)
+            os.chdir(self.home)
+
+    def run_OFCase_serial(self, solver = 'pimpleFoam', proc=50):
+
+        for case in self.cases:
+            os.chdir(case)
+            print(os.getcwd())
+            args = ['mpirun', '-np', str(proc) , 'pimpleFoam', '-parallel']
+            subprocess.run(args)
+            os.chdir(self.home)
+        os.chdir(self.home)
+
+
+    def run_OFCase_parallel(self, solver = 'pimpleFoam', proc=2, numSplits = 2):
+        cases_parallel = []
+        i = 0
+        numSplitsTemp = numSplits
+        print("the number of cases: ", len(self.cases))
+        print("\nThe cases are: ", ' '.join(self.cases))
+        print("\n")
+        while i < len(self.cases) - 1:
+            numSplits = numSplitsTemp
+            while numSplits > 1:
+                
+                print("running case: ", self.cases[i])
+                try:
                     os.chdir(self.home)
                     os.chdir(self.cases[i])
-                    os.chdir("..")
-                    thePath = os.getcwd() + '/Allrun.sh'
-                    cases_parallel.append(thePath)
-                    i=i+1
-                    numSplits = numSplits-1
-                args = ['parallel' , ':::'] + cases_parallel
-                subprocess.run(args)
+                    subprocess.Popen('mpirun -np ' + str(proc) +' '+ str(solver) + ' -parallel |tee logThatShit.txt', shell=True, stdout=open('stdout.txt', 'wb'), stderr=open('stderr.txt', 'wb'))
+                except:
+                    print('There was an error in running initial splits')
+                i=i+1
+                numSplits = numSplits-1
 
-                print(cases_parallel)
-                cases_parallel.clear()
+            print("calling last case of set: ", self.cases[i])
+            try:
+                os.chdir(self.home)
+                os.chdir(self.cases[i])
+                subprocess.call('mpirun -np ' + str(proc) + ' ' + str(solver)+ ' -parallel |tee logThatShit.txt', shell=True, stdout=open('stdout.txt', 'wb'), stderr=open('stderr.txt', 'wb'))
+                i=i+1
+                print("moving on to next set of cases\n")
+            except:
+                print('there was an error in running the last split')
+            
+            cases_parallel.clear()
             os.chdir(self.home)
 
 
     def generate(self):
         self.read_samples()
+        print('the sample names are:', self.samplenames)
         for case in self.cases:
             # Reconstruct parallel cases
             if not self.decomposed:
