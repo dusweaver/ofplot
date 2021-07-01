@@ -361,24 +361,31 @@ class Configuration:
         print(results)
         return results
 
+    def run_cases(self, solver , max_processors = 0):
 
-    def run_CFDEM(self, max_processors = 0):
-        print("Running CFDEM cases\n")
+        if re.search(r'cfdemSolver',solver):
+            print("running cases using the cfdem solver: ", solver)
+            cfdemFlag = True
+        else:
+            print("running cases using OpenFoam solver: ", solver)
+            cfdemFlag =False
+
 
         if max_processors ==0:
             num_cpus_system = multiprocessing.cpu_count()
-            print("setting system cpu count to sensed value of:", num_cpus_system)
+            print("no user specified max cpus set. setting to sensed cpu count:", num_cpus_system)
         else:
             
             num_cpus_system = max_processors
-            print("using specified maximum number of processors instead of what was read from system: ", num_cpus_system)
+            print("setting maximum cpus to user specified value: ", num_cpus_system)
 
         i=0
         while i < len(self.cases):
             os.chdir(self.home)
             #capture the number of processes using the command cfdemSolver and output to result.stdout and result.stderr
             #note this also includes the process running itself which is 2 processes
-            result = subprocess.run("ps -aF | grep 'cfdemSolver\|-parallel' | wc -l", shell=True,capture_output=True)
+            linux_command = "ps -aF | grep ' " + str(solver) + " ' | wc -l"
+            result = subprocess.run(linux_command, shell=True,capture_output=True)
             #filter out only the digits using re
             try:
                 num_cpus_avail = num_cpus_system - int(re.sub('\D', '', str(result.stdout)))+2
@@ -398,16 +405,22 @@ class Configuration:
                 #go up a directory to CFDEM case
                 os.chdir(self.home)
                 os.chdir(self.cases[i])
-                os.chdir("..")
+
+                if cfdemFlag:
+                  os.chdir("..")
+                  args = ['bash', 'Allrun.sh']
+                else:
+                  args = ['mpirun', '-np', str(num_cpus_case), solver, '-parallel']
+
                 print('running the case in: ', os.getcwd())
-                args = ['bash', 'Allrun.sh']
+                
                 subprocess.Popen(args,stdout=open('stdout.txt', 'wb'), stderr=open('stderr.txt', 'wb'))
-                time.sleep(60)
+                time.sleep(10)
                 i=i+1
             else:
                 print ('not enough cpus for case:', self.cases[i], 'needed:',num_cpus_case, 'avail:',num_cpus_avail, end="\r")
                 #print('.', end='', flush=True)
-                time.sleep(300)
+                time.sleep(10)
                 pass
             
             os.chdir(self.home)
