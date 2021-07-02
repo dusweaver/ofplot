@@ -244,12 +244,12 @@ class Configuration:
     def group_data(self):
         print("grouping data")
         for case in self.cases:
-            times = {}
+            samples = {}
             try: 
                 print("reading sampling files from case: ", case)
-                for time in self.times:
-                    samples = {}
-                    for sample in self.samplenames:
+                for sample in self.samplenames:
+                    times = {}
+                    for time in self.times:
                         samplesplit = sample.split('_')
                         print(samplesplit)
                         #this requires that the names be in a particular format.
@@ -261,10 +261,10 @@ class Configuration:
                             print('Unknown sample type')
                         #This requires that the time is the same for each of the cases (it would be awesome to just use the latest Time)
                         data = np.loadtxt(case + '/postProcessing/' + sample + '/' + str(time) + '/' + samplename)
-                        samples[sample] = data
-                    times[str(time)] = samples
+                        times[str(time)] = data
+                    samples[sample] = times
                     print(case, time, sample, data[0])
-                self.data[case] = times
+                self.data[case] = samples
             except Exception:
                 print("there was an error reading one of your data sampling files")
             # save all data as a file
@@ -279,10 +279,10 @@ class Configuration:
             for case in self.cases:
                 for time in self.times:
                     fig, ax = plt.subplots()
-                    for sample in self.data[case][time]:
+                    for sample in self.data[case]:
                         if 'plane' in sample:
                             continue
-                        transposed = np.transpose(self.data[case][time][sample])
+                        transposed = np.transpose(self.data[case][sample][time])
                         ax.scatter(transposed[0], transposed[1], label=sample)
                         ax.set_title(f'{case} at time {time}')
                         ax.legend(loc='best')
@@ -297,7 +297,7 @@ class Configuration:
                         continue
                     fig, ax = plt.subplots()
                     for time in self.times:
-                        transposed = np.transpose(self.data[case][time][sample])
+                        transposed = np.transpose(self.data[case][sample][time])
                         ax.scatter(transposed[0], transposed[1], label=time)
                         ax.set_title(f'{case} on {sample}')
                         ax.legend(loc='best')
@@ -312,7 +312,7 @@ class Configuration:
                 for time in self.times:
                     fig, ax = plt.subplots()
                     for case in self.cases:
-                        transposed = np.transpose(self.data[case][time][sample])
+                        transposed = np.transpose(self.data[case][sample][time])
                         ax.scatter(transposed[0], transposed[1], label=case)
                         ax.set_title(f'Sample {sample} at time {time}')
                         ax.legend(loc='best')
