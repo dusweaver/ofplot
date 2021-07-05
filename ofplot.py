@@ -12,6 +12,10 @@ import multiprocessing
 import re
 import time
 import psutil 
+from cycler import cycler
+
+import itertools
+
 
 import os.path
 
@@ -30,7 +34,8 @@ class Configuration:
         self.files = []
         self.cases = []
         self.domain = []
-        self.times = []
+        self.times = {}
+
         self.fields = {}
         self.lines = {}
         self.planes = {}
@@ -147,22 +152,51 @@ class Configuration:
             subprocess.run(command)
         os.chdir(self.home)
 
-    def add_time(self, value):
+    def add_time(self, value, start_from = 0):
         value = str(value)
-        solution = PyFoam.RunDictionary.SolutionDirectory.SolutionDirectory(self.cases[0])
-        if value == 'latest':
-            self.times.append(solution.getLast())
-        elif value == 'first':
-            self.times.append(solution.getFirst())
-        elif value == 'all':
-            if self.reconstructed:
-                self.times.append(solution.getTimes())
+        for case in self.cases:
+            solution = PyFoam.RunDictionary.SolutionDirectory.SolutionDirectory(case)
+            if start_from == 0:
+                if value == 'latest':
+                    self.times[case] = solution.getLast()
+                elif value == 'first':
+                    self.times[case] = solution.getFirst()
+                elif value == 'all':
+                    if self.reconstructed:
+                        self.times[case] = solution.getTimes()
+                    else:
+                        self.times[case] = solution.getParallelTimes()
+                else:
+                    self.times[case] = value
+            #ugly code for filtering out a range of values starting from start_from and ending at the last value.        
             else:
-                self.times.append(solution.getParallelTimes())
-        else:
-            self.times.append(value)
+                if self.reconstructed:
+                    self.times[case] = solution.getTimes()
+                else:
+                    self.times[case] = solution.getParallelTimes()
+                try:
+                    times = list(map(int, self.times[case]))
+                    times = [x for x in times if x >= start_from]
+                    for time in times:
+                        times = str(times)
+                    print("the case is:", case, " with filtered times of: ", times)
+                    self.times[case] = times 
+                #transient times with testing for if the time is integer and setting to that value.
+                except Exception:
+                    timesTemp = []
+                    #maps float onto the list of strings
+                    times = list(map(float, self.times[case]))
+                    times = [x for x in times if x >= start_from]
+                    for time in times:
+                        if time.is_integer():
+                            time = int(time)
+                        timesTemp.append(str(time))
+                    times = timesTemp
 
-        print("times added: ", self.times)
+                    print("the case is:", case, " with filtered times of: ", times)
+                    self.times[case] = times     
+    
+        print("times added RunDictionary: ", self.times)
 
     def add_field(self, value, col=1):
         self.fields[value] = col
@@ -221,13 +255,12 @@ class Configuration:
         for case in self.cases:
             print("running postProcess for case: ", case)
             os.chdir(case)
-            print(self.times)
-            if not self.times:
+            if not self.times[case]:
                 print("no times added postProcessing all times...")
                 args = ['parallel', 'postProcess', '-func', ':::'] + self.samplenames
                 subprocess.run(args)
             else:
-                for time in self.times:
+                for time in self.times[case]:
                     args = ['parallel', 'postProcess', '-time', str(time), '-func', ':::'] + self.samplenames
                     subprocess.run(args)
             os.chdir(self.home)
@@ -246,44 +279,53 @@ class Configuration:
         for case in self.cases:
             samples = {}
             try: 
-                print("reading sampling files from case: ", case)
+                print("reading sampling files ",self.samplenames, " from case: ", case)
                 for sample in self.samplenames:
                     times = {}
-                    for time in self.times:
+                    for time in self.times[case]:
                         samplesplit = sample.split('_')
                         print(samplesplit)
                         #this requires that the names be in a particular format.
                         if 'line' in sample:
                             samplename = samplesplit[1][:-1] + '_' + samplesplit[2] + '.xy'
+                            print(samplename)
                         elif 'plane' in sample:
                             samplename = samplesplit[2] + '_' + samplesplit[1][:-1] + '.raw'
                         else:
                             print('Unknown sample type')
-                        #This requires that the time is the same for each of the cases (it would be awesome to just use the latest Time)
-                        data = np.loadtxt(case + '/postProcessing/' + sample + '/' + str(time) + '/' + samplename)
+                        stringThing = case + '/postProcessing/' + sample + '/' + str(time) + '/' + samplename
+                        print("the stringThing is: ", stringThing)
+                        try:
+                            data = np.loadtxt(stringThing)
+                        except Exception:
+                            print("there was an error loading the sampling text file at time:", time)
+
                         times[str(time)] = data
                     samples[sample] = times
-                    print(case, time, sample, data[0])
+                    #print(case, time, sample, data[0])
+
                 self.data[case] = samples
             except Exception:
-                print("there was an error reading one of your data sampling files")
+                print("there was an error reading one of your data from case:", case)
             # save all data as a file
-            pickle.dump(self.data, open('data_dump.pkl', 'wb'))
+            #pickle.dump(self.data, open('data_dump.pkl', 'wb'))
 
-    def plot_lines(self, group):
+    def plot_lines(self, group, **plt_kwargs):
         ''' Plot lines grouped by conditions:
         group by 'sample', 'time' and 'case'
         '''
         os.makedirs('results', exist_ok=True)
+
+
         if group == 'sample':
             for case in self.cases:
-                for time in self.times:
-                    fig, ax = plt.subplots()
+                for time in self.times[case]:
+                    fig = plt.figure()
                     for sample in self.data[case]:
                         if 'plane' in sample:
                             continue
                         transposed = np.transpose(self.data[case][sample][time])
-                        ax.scatter(transposed[0], transposed[1], label=sample)
+                        ax.plot(transposed[0], transposed[1], label=sample, **plt_kwargs)
                         ax.set_title(f'{case} at time {time}')
                         ax.legend(loc='best')
                         folder = case.replace('/','_')
@@ -296,9 +338,9 @@ class Configuration:
                     if 'plane' in sample:
                         continue
                     fig, ax = plt.subplots()
-                    for time in self.times:
+                    for time in self.times[case]:
                         transposed = np.transpose(self.data[case][sample][time])
-                        ax.scatter(transposed[0], transposed[1], label=time)
+                        ax.plot(transposed[0], transposed[1], label=time, **plt_kwargs)
                         ax.set_title(f'{case} on {sample}')
                         ax.legend(loc='best')
                         folder = case.replace('/','_')
@@ -309,23 +351,42 @@ class Configuration:
             for sample in self.samplenames:
                 if 'plane' in sample:
                     continue
-                for time in self.times:
-                    fig, ax = plt.subplots()
-                    for case in self.cases:
-                        transposed = np.transpose(self.data[case][sample][time])
-                        ax.scatter(transposed[0], transposed[1], label=case)
-                        ax.set_title(f'Sample {sample} at time {time}')
-                        ax.legend(loc='best')
-                        folder = case.replace('/','_')
-                    plt.savefig(f'results/cases_{folder}_{sample}_{time}.png')
-                    plt.close(fig)
+                # for time in self.times[case]:
+                fig, ax = plt.subplots()
+
+                for case in self.cases:
+                    latestTime = 0
+
+                    #if this is a steady state case then extract the times as an integer list, otherwise as float list
+                    try:
+                        times = list(map(int, self.times[case]))
+                    except Exception:
+                        timesTemp = []
+                        times = list(map(float, self.times[case]))
+                        #needs to check for time = 5.0, for example, and return as '5' if that is the case.
+                        for time in times:
+                            if time.is_integer():
+                                time = int(time)
+                            timesTemp.append(str(time))
+                        times = timesTemp
+
+                    latestTime = max(times)
+
+                    transposed = np.transpose(self.data[case][sample][str(latestTime)])
+                    ax.plot(transposed[0], transposed[1], label=f'{case} with time {latestTime}', **plt_kwargs)
+                    ax.set_title(f'Sample {sample} at latestTime')
+                    ax.legend(loc='best')
+                    folder = case.replace('/','_')
+                plt.savefig(f'results/cases_{folder}_{sample}_{latestTime}.png')
+                plt.cla()
+                plt.close(fig)
 
     def plot_plane(self):
         ''' Plot extracted surface from plane sampling
         '''
         os.makedirs('results', exist_ok=True)
         for case in self.cases:
-            for time in self.times:
+            for time in self.times[case]:
                 fig, ax = plt.subplots()
                 for sample in self.data[case][time]:
                     if 'line' in sample:
@@ -528,7 +589,6 @@ class Configuration:
             
             cases_parallel.clear()
             os.chdir(self.home)
-
 
     def generate(self):
         self.read_samples()
