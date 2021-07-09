@@ -65,7 +65,6 @@ class Configuration:
         directories.remove(os.path.abspath(path))
 
         for directory in directories:
-
             #Check if controlDict exists in the directory
             caseCheck = directory + "/system/controlDict"            
             if os.path.isfile(caseCheck):
@@ -74,10 +73,11 @@ class Configuration:
                 folderNames = stringPath.split( os.path.sep )
 
                 casePath = folderNames[-1]
+                #last parent folder for if criteria 
+                end_parent = self.target.split("/")[-1]
 
                 for i in range(len(folderNames)):
-                    
-                    if folderNames[-i-2] == self.target:
+                    if folderNames[-i-2] == end_parent:
                         casePath =  self.target + '/' + casePath
                         break
                     else:
