@@ -287,14 +287,12 @@ class Configuration:
                         print(samplesplit)
                         #this requires that the names be in a particular format.
                         if 'line' in sample:
-                            samplename = samplesplit[1][:-1] + '_' + samplesplit[2] + '.xy'
+                            samplename = 'line_' + samplesplit[2] + '.xy'
                             print(samplename)
                         elif 'plane' in sample:
                             samplename = samplesplit[2] + '_' + samplesplit[1][:-1] + '.raw'
                         else:
                             print('Unknown sample type')
-                        stringThing = case + '/postProcessing/' + sample + '/' + str(time) + '/' + samplename
-                        print("the stringThing is: ", stringThing)
                         try:
                             data = np.loadtxt(stringThing)
                         except Exception:
@@ -302,15 +300,13 @@ class Configuration:
 
                         times[str(time)] = data
                     samples[sample] = times
-                    #print(case, time, sample, data[0])
-
                 self.data[case] = samples
             except Exception:
                 print("there was an error reading one of your data from case:", case)
-            # save all data as a file
-            #pickle.dump(self.data, open('data_dump.pkl', 'wb'))
+            #save all data as a file
+            pickle.dump(self.data, open('data_dump.pkl', 'wb'))
 
-    def plot_lines(self, group, **plt_kwargs):
+    def plot_lines(self, group, column_number = 1, **plt_kwargs):
         ''' Plot lines grouped by conditions:
         group by 'sample', 'time' and 'case'
         '''
@@ -325,7 +321,7 @@ class Configuration:
                         if 'plane' in sample:
                             continue
                         transposed = np.transpose(self.data[case][sample][time])
-                        ax.plot(transposed[0], transposed[1], label=sample, **plt_kwargs)
+                        ax.plot(transposed[0], transposed[column_number], label=sample, **plt_kwargs)
                         ax.set_title(f'{case} at time {time}')
                         ax.legend(loc='best')
                         folder = case.replace('/','_')
@@ -340,7 +336,7 @@ class Configuration:
                     fig, ax = plt.subplots()
                     for time in self.times[case]:
                         transposed = np.transpose(self.data[case][sample][time])
-                        ax.plot(transposed[0], transposed[1], label=time, **plt_kwargs)
+                        ax.plot(transposed[0], transposed[column_number], label=time, **plt_kwargs)
                         ax.set_title(f'{case} on {sample}')
                         ax.legend(loc='best')
                         folder = case.replace('/','_')
@@ -373,7 +369,7 @@ class Configuration:
                     latestTime = max(times)
 
                     transposed = np.transpose(self.data[case][sample][str(latestTime)])
-                    ax.plot(transposed[0], transposed[1], label=f'{case} with time {latestTime}', **plt_kwargs)
+                    ax.plot(transposed[0], transposed[column_number], label=f'{case} with time {latestTime}', **plt_kwargs)
                     ax.set_title(f'Sample {sample} at latestTime')
                     ax.legend(loc='best')
                     folder = case.replace('/','_')
