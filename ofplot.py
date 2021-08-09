@@ -13,6 +13,9 @@ import re
 import time
 import psutil 
 from cycler import cycler
+import pandas as pd
+
+from collections import defaultdict
 
 import itertools
 
@@ -175,6 +178,7 @@ class Configuration:
                 else:
                     self.times[case] = solution.getParallelTimes()
                 try:
+                    #change the dictornary to an integer list filter out the values wanted and then conver to string list
                     times = list(map(int, self.times[case]))
                     times = [x for x in times if x >= start_from]
                     for time in times:
@@ -184,7 +188,8 @@ class Configuration:
                 #transient times with testing for if the time is integer and setting to that value.
                 except Exception:
                     timesTemp = []
-                    #maps float onto the list of strings
+                    #maps float onto the list of strings and checkes if and changes to integer for floating digits.
+                    #i.e. if 5.0 then int(5.0) = 5 (this is to match OpenFOAM notation when outputing  time folders)
                     times = list(map(float, self.times[case]))
                     times = [x for x in times if x >= start_from]
                     for time in times:
@@ -251,7 +256,7 @@ class Configuration:
         args = ['parallel', command, '-case', ':::'] + self.cases
         subprocess.run(args)
 
-    def post_process(self,timed=all):
+    def post_process(self,timed=all,which_parallel='sample_names'):
         for case in self.cases:
             print("running postProcess for case: ", case)
             os.chdir(case)
@@ -260,9 +265,26 @@ class Configuration:
                 args = ['parallel', 'postProcess', '-func', ':::'] + self.samplenames
                 subprocess.run(args)
             else:
-                for time in self.times[case]:
-                    args = ['parallel', 'postProcess', '-time', str(time), '-func', ':::'] + self.samplenames
-                    subprocess.run(args)
+                if which_parallel == 'sample_names':
+                    print("post processing for times in parallel (samples are sequentially solved).....")
+                    for samplename in self.samplenames:
+                        args = ['parallel', 'postProcess', '-func', str(samplename), '-time', ':::'] + self.times[case] 
+                        subprocess.run(args)
+                else:
+                    print("post processing for samples in parallel (times are sequentially solved)......")
+                    for time in self.times[case]:
+                        args = ['parallel', 'postProcess', '-func', str(time), '-time', ':::'] + self.samplenames
+                        subprocess.run(args)
+
+            os.chdir(self.home)
+
+
+    def run_func_parallel(self,function):
+        for case in self.cases:
+            print("running function", function, "for case:", case)
+            os.chdir(case)
+            args = ['parallel', 'postProcess', '-func', str(function), '-time', ':::'] + self.times[case] 
+            subprocess.run(args)
             os.chdir(self.home)
         
     def post_process_single(self):
@@ -287,12 +309,14 @@ class Configuration:
                         print(samplesplit)
                         #this requires that the names be in a particular format.
                         if 'line' in sample:
-                            samplename = 'line_' + samplesplit[2] + '.xy'
+                            samplename = 'line_' + samplesplit[-1] + '.xy'
                             print(samplename)
                         elif 'plane' in sample:
                             samplename = samplesplit[2] + '_' + samplesplit[1][:-1] + '.raw'
                         else:
                             print('Unknown sample type')
+                        stringThing = case + '/postProcessing/' + sample + '/' + str(time) + '/' + samplename
+                        print("the stringThing is: ", stringThing)
                         try:
                             data = np.loadtxt(stringThing)
                         except Exception:
@@ -300,82 +324,97 @@ class Configuration:
 
                         times[str(time)] = data
                     samples[sample] = times
+                    #print(case, time, sample, data[0])
+
                 self.data[case] = samples
             except Exception:
                 print("there was an error reading one of your data from case:", case)
-            #save all data as a file
+            # save all data as a file
+            print("the keys to the data is:", self.data[case].keys())
             pickle.dump(self.data, open('data_dump.pkl', 'wb'))
 
-    def plot_lines(self, group, column_number = 1, **plt_kwargs):
+    def plot_lines_single(self,sample, group, experimental_file = 'None', folder_name = 'results', pickle_input_file = 'data_dump.pkl', **plt_kwargs):
         ''' Plot lines grouped by conditions:
         group by 'sample', 'time' and 'case'
+
         '''
-        os.makedirs('results', exist_ok=True)
 
+        pickle_file = open(pickle_input_file, "rb")
+        data = pickle.load(pickle_file)
+        os.makedirs(f'{folder_name}', exist_ok=True)
 
-        if group == 'sample':
-            for case in self.cases:
-                for time in self.times[case]:
-                    fig = plt.figure()
-                    for sample in self.data[case]:
-                        if 'plane' in sample:
-                            continue
-                        transposed = np.transpose(self.data[case][sample][time])
-                        ax.plot(transposed[0], transposed[column_number], label=sample, **plt_kwargs)
-                        ax.set_title(f'{case} at time {time}')
-                        ax.legend(loc='best')
-                        folder = case.replace('/','_')
-                    plt.savefig(f'results/sample_{folder}_{sample}_{time}.png')
-                    plt.close(fig)
 
         if group == 'time':
-            for case in self.cases:
-                for sample in self.samplenames:
-                    if 'plane' in sample:
-                        continue
-                    fig, ax = plt.subplots()
-                    for time in self.times[case]:
-                        transposed = np.transpose(self.data[case][sample][time])
-                        ax.plot(transposed[0], transposed[column_number], label=time, **plt_kwargs)
-                        ax.set_title(f'{case} on {sample}')
-                        ax.legend(loc='best')
-                        folder = case.replace('/','_')
-                    plt.savefig(f'results/time_{folder}_{sample}_{time}.png')
-                    plt.close(fig)
+            for case in data.keys():
+                fig, ax = plt.subplots()
+                for time in data[case][sample].keys():
+
+                    transposed = np.transpose(data[case][sample][time])
+                    ax.plot(transposed[0], transposed[1], label=time, **plt_kwargs)
+
+                    ax.set_title(f'{case} on {sample}')
+
+                if experimental_file != 'None':
+                    print("adding experimental data to the plot")
+
+                    data_experimental = np.loadtxt( experimental_file )
+                    x_experimental = np.transpose(data_experimental)[0]
+                    y_experimental = np.transpose(data_experimental)[1]
+                    ax.scatter(x_experimental,y_experimental,marker= 'x', color='black',label=experimental_file, **plt_kwargs)
+                    ax.set_title(f'experimental file: {experimental_file}')
+
+                ax.legend(loc='best')
+                folder = case.replace('/','_')
+
+
+                plt.savefig(f'{folder_name}/time_{folder}_{sample}_{time}.png')
+                plt.close(fig)
+
+        #put all the samplenames in a list so that we can iterate through them. This is assuming that all cases have the same samples
+        #which is required anyway if we want to group by case....
 
         if group == 'case':
-            for sample in self.samplenames:
-                if 'plane' in sample:
-                    continue
-                # for time in self.times[case]:
-                fig, ax = plt.subplots()
+            # for time in self.times[case]:
+            fig, ax = plt.subplots()
 
-                for case in self.cases:
-                    latestTime = 0
+            for case in data.keys():
+                latestTime = 0
 
-                    #if this is a steady state case then extract the times as an integer list, otherwise as float list
-                    try:
-                        times = list(map(int, self.times[case]))
-                    except Exception:
-                        timesTemp = []
-                        times = list(map(float, self.times[case]))
-                        #needs to check for time = 5.0, for example, and return as '5' if that is the case.
-                        for time in times:
-                            if time.is_integer():
-                                time = int(time)
-                            timesTemp.append(str(time))
-                        times = timesTemp
+                #if this is a steady state case then extract the times as an integer list, otherwise as float list
+                try:
+                    times = list(map(int, data[case][sample].keys()))
+                except Exception:
+                    timesTemp = []
+                    times = list(map(float, data[case][sample].keys()))
+                    #needs to check for time = 5.0, for example, and return as '5' if that is the case.
+                    for time in times:
+                        if time.is_integer():
+                            time = int(time)
+                        timesTemp.append(str(time))
+                    times = timesTemp
 
-                    latestTime = max(times)
+                latestTime = max(times)
 
-                    transposed = np.transpose(self.data[case][sample][str(latestTime)])
-                    ax.plot(transposed[0], transposed[column_number], label=f'{case} with time {latestTime}', **plt_kwargs)
-                    ax.set_title(f'Sample {sample} at latestTime')
-                    ax.legend(loc='best')
-                    folder = case.replace('/','_')
-                plt.savefig(f'results/cases_{folder}_{sample}_{latestTime}.png')
-                plt.cla()
-                plt.close(fig)
+                transposed = np.transpose(data[case][sample][str(latestTime)])
+                ax.plot(transposed[0], transposed[1], label=f'{case} t={latestTime}', **plt_kwargs)
+
+                ax.set_title(f'Sample {sample} at latestTime')
+
+
+            if experimental_file != 'None':
+                print("adding experimental data to the plot")
+
+                data_experimental = np.loadtxt( experimental_file )
+                x_experimental = np.transpose(data_experimental)[0]
+                y_experimental = np.transpose(data_experimental)[1]
+                ax.scatter(x_experimental,y_experimental,marker= 'x', color='black',label=experimental_file, **plt_kwargs)
+                ax.set_title(f'experimental file: {experimental_file}')
+
+            ax.legend(loc='best')
+            folder = case.replace('/','_')
+            plt.savefig(f'{folder_name}/cases_{folder}_{sample}_{latestTime}.png')
+            plt.cla()
+            plt.close(fig)
 
     def plot_plane(self):
         ''' Plot extracted surface from plane sampling
@@ -585,6 +624,60 @@ class Configuration:
             
             cases_parallel.clear()
             os.chdir(self.home)
+
+
+
+#not used but just here for an example
+
+    # def fit_function_out(x,fitting_expression,fitted_variables):
+
+    #   math_dict = {'exp':np.exp, 'sin': np.sin}
+    #   fitted_variables['x'] = x
+     
+    #   return eval(fitting_expression,fitted_variables,math_dict)
+
+
+
+    #by default will input data_dump.pkl and then output data_dump_norm.pkl
+    def normalize_data(self, norm_value_function, sample_name,norm_sample_name,sample_name_column_number=0,norm_sample_column_number=0,\
+      pickle_input_file = 'data_dump.pkl', pickle_output_file= 'data_dump_norm.pkl',norm_function='x/norm_value'):
+        
+        pickle_file = open(pickle_input_file, "rb")
+        data = pickle.load(pickle_file)
+
+        for case in data.keys():    
+            for sample in data[case].keys():
+                if sample == sample_name:
+                    for time in data[case][sample].keys():
+
+                        #now iterating through samples to find the sample to use for normalizing at time t=time
+                        for sample_norm in data[case].keys():
+                            if sample_norm == norm_sample_name:
+                                np_norm_data = list(data[case][sample_norm][time])
+                                df = pd.DataFrame(data=np_norm_data)
+
+                                #create a list for the desired normalization variable.
+                                var = df[df.columns[norm_sample_column_number]].tolist()
+                               
+                                #applies specified specified function to "var" 
+                                norm_value = eval(norm_value_function)
+
+                        np_data = list(data[case][sample][time])
+                        df = pd.DataFrame(data=np_data)
+
+                        #This is where normalization occurs
+                        eval_variables = {'norm_value':norm_value}
+
+                        df[df.columns[sample_name_column_number]]=df[df.columns[sample_name_column_number]].apply(lambda x: eval(norm_function,eval_variables,{'x':x}))
+
+                        data[case][sample][time] = df.values.tolist()
+
+        pickle.dump(data, open(pickle_output_file, 'wb'))
+                    
+
+    def test_case_convergence(self,case_name):
+        pass
+
 
     def generate(self):
         self.read_samples()
