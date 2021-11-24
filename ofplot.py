@@ -19,8 +19,13 @@ from collections import defaultdict
 
 import itertools
 
+import json
+
+
 
 import os.path
+
+
 
 class Configuration:
     def __init__(self, target):
@@ -333,7 +338,7 @@ class Configuration:
             print("the keys to the data is:", self.data[case].keys())
             pickle.dump(self.data, open('data_dump.pkl', 'wb'))
 
-    def plot_lines_single(self,sample, group, experimental_file = 'None', folder_name = 'results', pickle_input_file = 'data_dump.pkl', **plt_kwargs):
+    def plot_lines_single(self,sample, group, experimental_file = 'None', folder_name = 'results', pickle_input_file = 'data_dump.pkl', experimental_file2='None', **plt_kwargs):
         ''' Plot lines grouped by conditions:
         group by 'sample', 'time' and 'case'
 
@@ -362,6 +367,15 @@ class Configuration:
                     y_experimental = np.transpose(data_experimental)[1]
                     ax.scatter(x_experimental,y_experimental,marker= 'x', color='black',label=experimental_file, **plt_kwargs)
                     ax.set_title(f'experimental file: {experimental_file}')
+
+                if experimental_file2 != 'None':
+                    print("adding second experimental data to the plot")
+
+                    data_experimental2 = np.loadtxt( experimental_file2 )
+                    x_experimental2 = np.transpose(data_experimental2)[0]
+                    y_experimental2 = np.transpose(data_experimental2)[1]
+                    ax.scatter(x_experimental2,y_experimental2,marker= 'x', color='blue',label=experimental_file2, **plt_kwargs)
+                    ax.set_title(f'experimental file: {experimental_file2}')
 
                 ax.legend(loc='best')
                 folder = case.replace('/','_')
@@ -409,6 +423,16 @@ class Configuration:
                 y_experimental = np.transpose(data_experimental)[1]
                 ax.scatter(x_experimental,y_experimental,marker= 'x', color='black',label=experimental_file, **plt_kwargs)
                 ax.set_title(f'experimental file: {experimental_file}')
+                
+            if experimental_file2 != 'None':
+                print("adding second experimental data to the plot")
+
+                data_experimental2 = np.loadtxt( experimental_file2 )
+                x_experimental2 = np.transpose(data_experimental2)[0]
+                y_experimental2 = np.transpose(data_experimental2)[1]
+                ax.scatter(x_experimental2,y_experimental2,marker= 'x', color='blue',label=experimental_file2, **plt_kwargs)
+                ax.set_title(f'experimental file: {experimental_file2}')
+
 
             ax.legend(loc='best')
             folder = case.replace('/','_')
@@ -637,40 +661,76 @@ class Configuration:
     #   return eval(fitting_expression,fitted_variables,math_dict)
 
 
+ 
 
     #by default will input data_dump.pkl and then output data_dump_norm.pkl
-    def normalize_data(self, norm_value_function, sample_name,norm_sample_name,sample_name_column_number=0,norm_sample_column_number=0,\
-      pickle_input_file = 'data_dump.pkl', pickle_output_file= 'data_dump_norm.pkl',norm_function='x/norm_value'):
+    def normalize_data(self,json_file_name):
+
+        with open(json_file_name) as f:
+            json_inputs = json.load(f)
+            
+
+        #Gather all the json inputs================================
+        norm_function = json_inputs['normalization_functions']
+        norm_value_function = json_inputs['norm_values']
+
+        sample_names = json_inputs["target_and_read_samples"][0]
+        target_sample = list(sample_names.keys())[0]
+        if len(list(sample_names.keys())) ==1:
+            print('Duplicate sample names. Setting read sample to be equal to target sample')
+            read_sample = list(sample_names.keys())[0]
+        else:
+            read_sample = list(sample_names.keys())[1]
+
+        target_sample_col_nums = sample_names[target_sample].split(",")
+        read_sample_col_nums = sample_names[read_sample].split(",")
+
+        pickle_input_file = json_inputs["pickle_input_file"]
+        pickle_output_file = json_inputs["pickle_output_file"]
+        #==========================================================
+
+        norm_functions = norm_function.split(",")
+        norm_value_functions = norm_value_function.split(",")
+
+
+        print("the normalization function is:", norm_functions)
+        print("the norm value function is:", norm_value_functions)
+        print("the target sample is:", target_sample)
+        print("the read sample is", read_sample)
+
         
         pickle_file = open(pickle_input_file, "rb")
         data = pickle.load(pickle_file)
 
-        for case in data.keys():    
-            for sample in data[case].keys():
-                if sample == sample_name:
-                    for time in data[case][sample].keys():
+        for i in range(len(norm_value_functions)):
+            print(i)
+            for case in data.keys():    
+                for sample in data[case].keys():
+                    if sample == target_sample:
+                        for time in data[case][sample].keys():
 
-                        #now iterating through samples to find the sample to use for normalizing at time t=time
-                        for sample_norm in data[case].keys():
-                            if sample_norm == norm_sample_name:
-                                np_norm_data = list(data[case][sample_norm][time])
-                                df = pd.DataFrame(data=np_norm_data)
+                            #now iterating through samples to find the sample to use for normalizing at time t=time
+                            for sample_norm in data[case].keys():
+                                if sample_norm == read_sample:
 
-                                #create a list for the desired normalization variable.
-                                var = df[df.columns[norm_sample_column_number]].tolist()
-                               
-                                #applies specified specified function to "var" 
-                                norm_value = eval(norm_value_function)
+                                    np_norm_data = list(data[case][sample_norm][time])
+                                    df = pd.DataFrame(data=np_norm_data)
 
-                        np_data = list(data[case][sample][time])
-                        df = pd.DataFrame(data=np_data)
+                                    #create a list for the desired normalization variable.
+                                    var = df[df.columns[int(read_sample_col_nums[i])]].tolist()
+                                   
+                                    #applies specified specified function to "var" 
+                                    norm_value = eval(norm_value_functions[i])
 
-                        #This is where normalization occurs
-                        eval_variables = {'norm_value':norm_value}
+                            np_data = list(data[case][sample][time])
+                            df = pd.DataFrame(data=np_data)
 
-                        df[df.columns[sample_name_column_number]]=df[df.columns[sample_name_column_number]].apply(lambda x: eval(norm_function,eval_variables,{'x':x}))
+                            #This is where normalization occurs
+                            eval_variables = {'norm_value':norm_value}
 
-                        data[case][sample][time] = df.values.tolist()
+                            df[df.columns[int(target_sample_col_nums[i])]]=df[df.columns[int(target_sample_col_nums[i])]].apply(lambda x: eval(norm_functions[i],eval_variables,{'x':x}))
+
+                            data[case][sample][time] = df.values.tolist()
 
         pickle.dump(data, open(pickle_output_file, 'wb'))
                     
