@@ -1,0 +1,13 @@
+//sampleline0.cfg
+interpolationScheme cellPointFace;
+setFormat   raw;
+setConfig
+{
+type    uniform;
+axis    distance;
+nPoints 100;
+}
+start   (0.07765 -0.0254 0.0005);
+end     (0.07765 0.0254 0.0005);
+fields  (U);
+#includeEtc "caseDicts/postProcessing/graphs/graph.cfg"

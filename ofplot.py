@@ -184,10 +184,11 @@ class Configuration:
                     self.times[case] = solution.getParallelTimes()
                 try:
                     #change the dictornary to an integer list filter out the values wanted and then conver to string list
-                    times = list(map(int, self.times[case]))
+
+                    times = list(map(str, self.times[case]))
                     times = [x for x in times if x >= start_from]
-                    for time in times:
-                        times = str(times)
+                    # for time in times:
+                    #     times = str(times)
                     print("the case is:", case, " with filtered times of: ", times)
                     self.times[case] = times 
                 #transient times with testing for if the time is integer and setting to that value.
@@ -204,7 +205,7 @@ class Configuration:
                     times = timesTemp
 
                     print("the case is:", case, " with filtered times of: ", times)
-                    self.times[case] = times     
+                    self.times[case] = times       
     
         print("times added RunDictionary: ", self.times)
 
@@ -274,6 +275,7 @@ class Configuration:
                     print("post processing for times in parallel (samples are sequentially solved).....")
                     for samplename in self.samplenames:
                         args = ['parallel', 'postProcess', '-func', str(samplename), '-time', ':::'] + self.times[case] 
+                        print(args)
                         subprocess.run(args)
                 else:
                     print("post processing for samples in parallel (times are sequentially solved)......")
@@ -501,22 +503,31 @@ class Configuration:
             print("setting maximum cpus to user specified value: ", num_cpus_system)
 
         i=0
+        num_cpus_avail = num_cpus_system
+        print("number of cases",len(self.cases))
         while i < len(self.cases):
             os.chdir(self.home)
+
             #capture the number of processes using the command cfdemSolver and output to result.stdout and result.stderr
             #note this also includes the process running itself which is 2 processes
-            linux_command = "ps -aF | grep ' " + str(solver) + " ' | wc -l"
-            result = subprocess.run(linux_command, shell=True,capture_output=True)
-            #filter out only the digits using re
+            # linux_command = "ps -aF | grep ' " + str(solver) + " ' | wc -l"
+            # result = subprocess.run(linux_command, shell=True,capture_output=True)
+            # #filter out only the digits using re
+            # try:
+            #     num_cpus_avail = num_cpus_system - int(re.sub('\D', '', str(result.stdout)))+2
+            # except Exception:
+            #     print("was unable to convert the bytes data output to a string")
+
+            # #get the number of cpus used by decomposeParDict
+
             try:
-                num_cpus_avail = num_cpus_system - int(re.sub('\D', '', str(result.stdout)))+2
+                num_cpus_case = self.read_value_from_file(self.cases[i],'system/decomposeParDict', 'numberOfSubdomains')
+                # print('number of cpus for the case', num_cpus_case)
             except Exception:
-                print("was unable to convert the bytes data output to a string")
+                print("no decomposeParDict file found, setting number of cpus for the case to 1 (num_cpus_case=1)");
+                num_cpus_case = 1;
 
-            #get the number of cpus used by decomposeParDict
-            num_cpus_case = self.read_value_from_file(self.cases[i],'system/decomposeParDict', 'numberOfSubdomains')
-            # print('number of cpus for the case', num_cpus_case)
-
+        
             
             if num_cpus_case <= num_cpus_avail:
                 print('\n\nnumber of cpus available', num_cpus_avail)
@@ -528,10 +539,13 @@ class Configuration:
                 os.chdir(self.cases[i])
 
                 if cfdemFlag:
-                  os.chdir("..")
-                  args = ['bash', 'Allrun.sh']
+                    os.chdir("..")
+                    args = ['bash', 'Allrun.sh']
+                elif num_cpus_case != 1: 
+                    args = ['mpirun', '-np', str(num_cpus_case), solver, '-parallel']
                 else:
-                  args = ['mpirun', '-np', str(num_cpus_case), solver, '-parallel']
+                    args = [solver]
+
 
                 print('running the case in: ', os.getcwd())
 
@@ -551,6 +565,7 @@ class Configuration:
                 #print('.', end='', flush=True)
                 time.sleep(5)
                 pass
+            num_cpus_avail = num_cpus_avail - num_cpus_case
             
             os.chdir(self.home)
 
@@ -589,9 +604,10 @@ class Configuration:
                     except Exception:
                         print('there was an error reading the value in column:',column_number)
             os.chdir(self.home)         
-        except Exception:
+        except AttributeError:
             print('There was an error in reading the file or string to replace value for case: ', case)
             os.chdir(self.home)
+            pass
 
         os.chdir(self.home)
 
@@ -659,8 +675,6 @@ class Configuration:
     #   fitted_variables['x'] = x
      
     #   return eval(fitting_expression,fitted_variables,math_dict)
-
-
  
 
     #by default will input data_dump.pkl and then output data_dump_norm.pkl
@@ -737,6 +751,7 @@ class Configuration:
 
     def test_case_convergence(self,case_name):
         pass
+
 
 
     def generate(self):
