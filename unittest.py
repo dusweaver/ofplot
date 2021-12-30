@@ -4,21 +4,24 @@ import ofplot as of
 if os.environ['WM_PROJECT_VERSION'][0] == 'v':
     target = 'testCOM'
 else:
-    target = 'tutorials/run_cases'
+    target = 'tutorials/change_boundaryconditions'
 
 plot = of.Configuration(target)
 plot.decomposed = True
 
-#plot.run_parallel('blockMesh')
+plot.generate()
 
-#plot.run_cases("simpleFoam" , max_processors = 3)
+plot.change_boundaryconditions(field = 'U', boundary = "outlet", outputname = '\n{\ntype pressureInletOutletVelocity;\n value uniform (0 0 0);\n' )
+plot.change_boundaryconditions(field = 'p', boundary = "outlet", outputname = '\n{\ntype totalPressure;\n p0 uniform 0;\n' )
+
+
+plot.run_parallel('blockMesh')
+
+plot.run_cases("simpleFoam" , max_processors = 3)
 
 plot.reconstructed=True
 plot.add_time('all',start_from=100)
 
-plot.generate()
-
-#plot.run_parallel('simpleFoam')
 
 plot.post_process()
 

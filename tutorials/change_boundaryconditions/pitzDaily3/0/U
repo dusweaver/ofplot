@@ -7,44 +7,45 @@
 \*---------------------------------------------------------------------------*/
 FoamFile
 {
-    version     2.0;
-    format      ascii;
-    class       volScalarField;
-    object      p;
+version     2.0;
+format      ascii;
+class       volVectorField;
+object      U;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 2 -2 0 0 0 0];
+dimensions      [0 1 -1 0 0 0 0];
 
-internalField   uniform 0;
+internalField   uniform (0 0 0);
 
 boundaryField
 {
-    inlet
-    {
-        type            zeroGradient;
-    }
+inlet
+{
+type            fixedValue;
+value           uniform (15 0 0);
+}
 
-    outlet
-    {
-        type            fixedValue;
-        value           uniform 0;
-    }
+outlet
+{
+type pressureInletOutletVelocity;
+ value uniform (0 0 0);
+}
 
-    upperWall
-    {
-        type            zeroGradient;
-    }
+upperWall
+{
+type            noSlip;
+}
 
-    lowerWall
-    {
-        type            zeroGradient;
-    }
+lowerWall
+{
+type            noSlip;
+}
 
-    frontAndBack
-    {
-        type            empty;
-    }
+frontAndBack
+{
+type            empty;
+}
 }
 
 // ************************************************************************* //

@@ -7,10 +7,10 @@
 \*---------------------------------------------------------------------------*/
 FoamFile
 {
-    version     2.0;
-    format      ascii;
-    class       volVectorField;
-    object      U;
+version     2.0;
+format      ascii;
+class       volVectorField;
+object      U;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -20,31 +20,32 @@ internalField   uniform (0 0 0);
 
 boundaryField
 {
-    inlet
-    {
-        type            fixedValue;
-        value           uniform (15 0 0);
-    }
+inlet
+{
+type            fixedValue;
+value           uniform (12 0 0);
+}
 
-    outlet
-    {
-        type            zeroGradient;
-    }
+outlet
+{
+type pressureInletOutletVelocity;
+ value uniform (0 0 0);
+}
 
-    upperWall
-    {
-        type            noSlip;
-    }
+upperWall
+{
+type            noSlip;
+}
 
-    lowerWall
-    {
-        type            noSlip;
-    }
+lowerWall
+{
+type            noSlip;
+}
 
-    frontAndBack
-    {
-        type            empty;
-    }
+frontAndBack
+{
+type            empty;
+}
 }
 
 // ************************************************************************* //

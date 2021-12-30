@@ -6,6 +6,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 import PyFoam
 from PyFoam.Execution.UtilityRunner import UtilityRunner
+from PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile
 import pickle
 import multiprocessing
 
@@ -43,15 +44,21 @@ class Configuration:
         self.cases = []
         self.domain = []
         self.times = {}
+        
+        self.samplenames = []
+        self.boundaryconditions = {}
+
 
         self.fields = {}
         self.lines = {}
         self.planes = {}
         self.data = {}
-        self.samplenames = []
+
+        
         #self.read_files(self.target)
         self.decomposed = True
-        self.read_files_independent(self.target)     
+        self.read_files_independent(self.target)
+
 
     def get_domain_size(self):
         os.chdir(self.cases[0])
@@ -62,7 +69,7 @@ class Configuration:
         self.domain = [[float(a[0]), float(a[1]), float(a[2])],
                        [float(a[3]), float(a[4]), float(a[5])]]
         os.chdir(self.home)
-
+        
 
     def read_files_independent(self, target):
         os.chdir(self.target)
@@ -106,59 +113,48 @@ class Configuration:
             # remove repeated sample names
         self.samplenames = list(set(self.samplenames))
 
-    def create_sample_line(self, case, key_loc, value_loc, key_field):  
-        string  = f'//sample{key_loc}.cfg' + '\n'
-        string += 'interpolationScheme cellPointFace;' + '\n'
-        string += 'setFormat   raw;' + '\n'
-        string += 'setConfig' + '\n'
-        string += '{' + '\n'
-        if self.version == 'COM':
-            string += 'type    uniform;' + '\n'
-        else:
-            string += 'type    lineUniform;' + '\n'
-        string += 'axis    distance;' + '\n'
-        string += 'nPoints 100;' + '\n'
-        string += '}' + '\n'
-        string += f'start   ({value_loc[0][0]} {value_loc[1][0]} {value_loc[2][0]});' + '\n'
-        string += f'end     ({value_loc[0][1]} {value_loc[1][1]} {value_loc[2][1]});' + '\n'
-        string += f'fields  ({key_field});' + '\n'
-        string += '#includeEtc "caseDicts/postProcessing/graphs/graph.cfg"' + '\n'
+    def read_boundaryconditions(self):
+        print("reading boundary condition filenames")
+        try: 
+            for case in self.cases:
+                os.chdir(self.home)
+                all_files = glob.glob(f'{case}/0/*')
+                self.boundaryconditions[case] = all_files
+                print("boundary conditions for case: ", case, "is ", self.boundaryconditions[case])
+        except Exception:
+            print("There was an error when reading the boundary condition filenames")
 
-        filename = f'sample_{key_loc}_{key_field}'
-        with open(case+'/system/'+filename, 'w') as f:
-            f.write(string)
+    def change_boundaryconditions(self,field = None, boundary = None, outputname = None):
+        # Read in the file
+        print("change boundary conditions for field", field, "and boundary", boundary)
+        try:
+            
+            for case in self.cases:
+                for boundarycondition in self.boundaryconditions[case]:
+                    filename = boundarycondition.split('/')[-1]
+                    if filename == field:
+                        with open(boundarycondition, 'r') as file :
+                          filedata = file.read()
 
-    def create_sample_plane(self, case, key_loc, value_loc, key_field):
-        string  = f'//sample{key_loc}.cfg' + '\n'
-        string += f'interpolationScheme cell;' + '\n'
-        string += f'surfaceFormat raw;' + '\n'
-        string += f'type surfaces;' + '\n'
-        string += f'fields  ({key_field});' + '\n'
-        string += f'surfaces' + '\n'
-        string += '{' + '\n'
-        string += f'    plane' + '\n'
-        string += '    {' + '\n'
-        string += f'        type plane;' + '\n'
-        string += f'        planeType pointAndNormal;' + '\n'
-        string += f'        pointAndNormalDict' + '\n'
-        string += '        {' + '\n'
-        string += f'            point   ({value_loc[0][0]} {value_loc[1][0]} {value_loc[2][0]});' + '\n'
-        string += f'            normal     ({value_loc[0][1]} {value_loc[1][1]} {value_loc[2][1]});' + '\n'
-        string += '         }' + '\n'
-        string += '    }' + '\n'
-        string += '};' + '\n'
+                        # Replace the target string
+                        str1 = boundary
+                        str2 = '\\}'
 
-        filename = f'sample_{key_loc}_{key_field}'
-        with open(case+'/system/'+filename, 'w') as f:
-            f.write(string)
+                        newstring = outputname
+                        reg = "(?<=%s).*?(?=%s)" % (str1,str2)
+                        r = re.compile(reg,re.DOTALL)
+                        result = r.sub(newstring, filedata)
 
-    def reconstruct_par(self, case):
-        os.chdir(case)
-        for time in self.times:
-            for field in self.fields:
-                command = ['reconstructPar', '-time', str(time), '-fields', field, '-noLagrangian', '-newTimes']
-            subprocess.run(command)
-        os.chdir(self.home)
+                        filedata = result
+
+                        #Write the file out again
+                        with open(boundarycondition, 'w') as file:
+                          file.write(filedata)
+        except Exception:
+            print("error:was unable to change the boundary condition")
+
+
+
 
     def add_time(self, value, start_from = 0):
         value = str(value)
@@ -208,46 +204,6 @@ class Configuration:
                     self.times[case] = times       
     
         print("times added RunDictionary: ", self.times)
-
-    def add_field(self, value, col=1):
-        self.fields[value] = col
-    
-    def add_line(self, x='length', y='length', z='length', coord='rel'):
-
-        if not len(self.domain):
-            self.get_domain_size()
-
-        current = f'line{len(self.lines)}'
-        if coord == 'rel':
-            x, y, z = self.convert_relative(x, y, z)
-
-        if not isinstance(x, str) and not isinstance(y, str):
-            self.lines[current] = [[x, x],[y, y],[self.domain[0][2], self.domain[1][2]]]
-        elif not isinstance(x, str) and not isinstance(z, str):
-            self.lines[current] = [[x, x],[self.domain[0][1], self.domain[1][1]],[z, z]]
-        elif not isinstance(y, str) and not isinstance(z, str):
-            self.lines[current] = [[self.domain[0][0], self.domain[1][0]],[y, y],[z, z]]
-        else:
-            print(f'Bad location definition: {x} {y} {z}')
-
-    def add_plane(self, x, y, z, normal, coord='rel'):
-        if not len(self.domain):
-            self.get_domain_size()
-
-        current = f'plane{len(self.planes)}'
-
-        if coord == 'rel':
-            x, y, z = self.convert_relative(x, y, z)
-
-        if normal == 'x':
-            normal = [1, 0, 0]
-        elif normal == 'y':
-            normal = [0, 1, 0]
-        elif normal == 'z':
-            normal = [0, 0, 1]
-        else:
-            print('Please define normal as x, y or z')
-        self.planes[current] = [[x, normal[0]], [y, normal[1]], [z,normal[2]]]
 
     def convert_relative(self, x, y, z):
         if not isinstance(x, str):
@@ -753,9 +709,20 @@ class Configuration:
         pass
 
 
+    # def change_BC(self):
+    #     for case in self.cases:
+    #         # dire=PyFoam.RunDictionary.SolutionDirectory.SolutionDirectory(case)
+    #         # sol=PyFoam.RunDictionary.SolutionFile.SolutionFile(dire.initialDir(),"U")
+    #         # sol.replaceBoundary("outlet","(%f 0 0) hi there" %(100))
+    #         dire= case + "/0/U"
+    #         f=ParsedParameterFile(dire)
+
+
+
 
     def generate(self):
         self.read_samples()
+        self.read_boundaryconditions()
         print('the sample names are:', self.samplenames)
         for case in self.cases:
             # Reconstruct parallel cases
@@ -770,3 +737,99 @@ class Configuration:
                 for key_field in self.fields:
                     self.create_sample_plane(case, key_loc, value_loc, key_field)
         print('Sample files generated')
+
+
+
+    def create_sample_line(self, case, key_loc, value_loc, key_field):  
+        string  = f'//sample{key_loc}.cfg' + '\n'
+        string += 'interpolationScheme cellPointFace;' + '\n'
+        string += 'setFormat   raw;' + '\n'
+        string += 'setConfig' + '\n'
+        string += '{' + '\n'
+        if self.version == 'COM':
+            string += 'type    uniform;' + '\n'
+        else:
+            string += 'type    lineUniform;' + '\n'
+        string += 'axis    distance;' + '\n'
+        string += 'nPoints 100;' + '\n'
+        string += '}' + '\n'
+        string += f'start   ({value_loc[0][0]} {value_loc[1][0]} {value_loc[2][0]});' + '\n'
+        string += f'end     ({value_loc[0][1]} {value_loc[1][1]} {value_loc[2][1]});' + '\n'
+        string += f'fields  ({key_field});' + '\n'
+        string += '#includeEtc "caseDicts/postProcessing/graphs/graph.cfg"' + '\n'
+
+        filename = f'sample_{key_loc}_{key_field}'
+        with open(case+'/system/'+filename, 'w') as f:
+            f.write(string)
+
+    def create_sample_plane(self, case, key_loc, value_loc, key_field):
+        string  = f'//sample{key_loc}.cfg' + '\n'
+        string += f'interpolationScheme cell;' + '\n'
+        string += f'surfaceFormat raw;' + '\n'
+        string += f'type surfaces;' + '\n'
+        string += f'fields  ({key_field});' + '\n'
+        string += f'surfaces' + '\n'
+        string += '{' + '\n'
+        string += f'    plane' + '\n'
+        string += '    {' + '\n'
+        string += f'        type plane;' + '\n'
+        string += f'        planeType pointAndNormal;' + '\n'
+        string += f'        pointAndNormalDict' + '\n'
+        string += '        {' + '\n'
+        string += f'            point   ({value_loc[0][0]} {value_loc[1][0]} {value_loc[2][0]});' + '\n'
+        string += f'            normal     ({value_loc[0][1]} {value_loc[1][1]} {value_loc[2][1]});' + '\n'
+        string += '         }' + '\n'
+        string += '    }' + '\n'
+        string += '};' + '\n'
+
+        filename = f'sample_{key_loc}_{key_field}'
+        with open(case+'/system/'+filename, 'w') as f:
+            f.write(string)
+
+    def reconstruct_par(self, case):
+        os.chdir(case)
+        for time in self.times:
+            for field in self.fields:
+                command = ['reconstructPar', '-time', str(time), '-fields', field, '-noLagrangian', '-newTimes']
+            subprocess.run(command)
+        os.chdir(self.home)
+
+    def add_field(self, value, col=1):
+        self.fields[value] = col
+    
+    def add_line(self, x='length', y='length', z='length', coord='rel'):
+
+        if not len(self.domain):
+            self.get_domain_size()
+
+        current = f'line{len(self.lines)}'
+        if coord == 'rel':
+            x, y, z = self.convert_relative(x, y, z)
+
+        if not isinstance(x, str) and not isinstance(y, str):
+            self.lines[current] = [[x, x],[y, y],[self.domain[0][2], self.domain[1][2]]]
+        elif not isinstance(x, str) and not isinstance(z, str):
+            self.lines[current] = [[x, x],[self.domain[0][1], self.domain[1][1]],[z, z]]
+        elif not isinstance(y, str) and not isinstance(z, str):
+            self.lines[current] = [[self.domain[0][0], self.domain[1][0]],[y, y],[z, z]]
+        else:
+            print(f'Bad location definition: {x} {y} {z}')
+
+    def add_plane(self, x, y, z, normal, coord='rel'):
+        if not len(self.domain):
+            self.get_domain_size()
+
+        current = f'plane{len(self.planes)}'
+
+        if coord == 'rel':
+            x, y, z = self.convert_relative(x, y, z)
+
+        if normal == 'x':
+            normal = [1, 0, 0]
+        elif normal == 'y':
+            normal = [0, 1, 0]
+        elif normal == 'z':
+            normal = [0, 0, 1]
+        else:
+            print('Please define normal as x, y or z')
+        self.planes[current] = [[x, normal[0]], [y, normal[1]], [z,normal[2]]]
